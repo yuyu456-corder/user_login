@@ -7,15 +7,15 @@
 
     <!-- <input type="checkbox" id="sexFilter" v-model="femaleHidden" /> -->
     <!-- <label for="sexFilter">男性のみ表示</label> -->
+    <!-- sexFilterはmember情報にshownを追加してv-shownで行っていた -->
 
     <h2>アカウント登録者一覧</h2>
     <ul id="memberList">
       <li
-        v-for="member in members"
+        v-for="(member,index) in members"
         v-bind:key="member.id"
-        v-show="member.shown"
       >
-        ID: {{ member.id }}, Name: {{ member.name }}, Sex: {{ member.sex }},
+        id: {{ member.id }}, Name: {{ member.name }}, Sex: {{ member.sex }},
         Office: {{ member.office }}
       </li>
       <!-- <button @click="doRemove(index)">アカウント削除</button> -->
@@ -33,8 +33,7 @@ export default {
   name: "AdministratorPage",
   data: function() {
     return {
-      members: [
-      ],
+      members: [],
       // ユーザーからの入力値(v-modelで参照)
       // isLoggedIn: false, // ログイン状態の判定
       // login: {
@@ -68,6 +67,7 @@ export default {
       "GET"
     );
     console.debug("getUserDataの内容:", this.getUserData);
+    //連想配列にして、vue側のdataオプションで捕捉する
     this.members = JSON.parse(this.getUserData);
   }
 };
