@@ -4,12 +4,24 @@
     <h1>ログイン画面</h1>
     <h2>新規登録</h2>
 
-    <accountInputForm buttonName="登録" class="accountRedisterForm"/>
+    <accountInputForm
+      placeholderWords="新規ユーザー名"
+      shownForm="display:none"
+      shownResistButton=""
+      shownUpdateButton="display:none"
+      class="accountRedisterForm"
+    />
 
     <h2>アカウント情報変更</h2>
     <p>既にアカウントを変更しているユーザが対象です</p>
 
-    <accountInputForm buttonName="更新" class="accountUpdateForm"/>
+    <accountInputForm
+      placeholderWords="変更ユーザー名"
+      shownForm=""
+      shownResistButton="display:none"
+      shownUpdateButton=""
+      class="accountUpdateForm"
+    />
 
     <p>あなたは{{ accessCount }}人目の訪問者です！</p>
 
@@ -53,6 +65,12 @@ export default {
   components: {
     //ここはこのvueファイルで構成されているコンポーネント名を羅列する？
     accountInputForm
+  },
+  data: function() {
+    return {
+      //アクセスカウンタ（初期値0）
+      accessCount: 0
+    };
   },
   //アクセスカウンタ機能のメソッド
   created: function() {

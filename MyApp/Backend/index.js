@@ -32,43 +32,38 @@ export default (app, http) => {
 
     //レコード挿入(即時関数)
     (async function insertRecord() {
-      try {
-        console.log("Record Inserting...");
-        //Model.create は Model.build と instance.saveを行っている
-        await models.user
-          .create({
-            // idはDB側でautoIncrementに設定している
-            name: accountData.name,
-            sex: accountData.sex,
-            office: accountData.office,
-            createdAt: new Date().toLocaleString({ timeZone: 'Asia/Tokyo' }),
-            updatedAt: new Date().toLocaleString({ timeZone: 'Asia/Tokyo' })
-          })
-          .then(
-            //Promise Resolve
-            resolve => {
-              console.debug("Hello! " + resolve.name + " Inserted!");
-              return null;
-            },
-            //Promise Failed
-            failed => {
-              console.debug("ERROR:" + failed);
-              console.log("ERROR:Record Inserting Promise Failed...");
-              return null;
-            }
-          )
-          .finally(() => {
-            res.send("Record Inserting Process Done!");
-          });
-      } catch (error) {
-        res.send("ERROR: Record Inserting is Aborted...");
-      }
+      console.log("Record Inserting...");
+      //Model.createはModel.buildとinstance.saveを行っている
+      await models.user
+        .create({
+          // idはDB側でautoIncrementに設定している
+          name: accountData.name,
+          sex: accountData.sex,
+          office: accountData.office,
+          createdAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" }),
+          updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
+        })
+        .then(
+          //Promise Resolve
+          resolve => {
+            console.debug("Hello! " + resolve.name + " Inserted!");
+            return null;
+          },
+          //Promise Failed
+          failed => {
+            console.debug("ERROR:" + failed);
+            console.error("Record Inserting Promise Failed...");
+            return null;
+          }
+        )
+        .finally(() => {
+          res.send("Record Inserting Process Done!");
+        });
     })();
   });
 
   //レコード参照を行うルーティング処理
   app.get("/ReferenceTable", (req, res) => {
-
     //モデルの読み込み
     const models = require("./db/models/");
 
@@ -77,25 +72,68 @@ export default (app, http) => {
       console.log("Table Referencing...");
 
       //usersテーブルから全て取得している
-      await models.user.findAll().then(
-        //Promise Resolve
-        resolve => {
-          let findTable = JSON.stringify(resolve);
-          //JSONファイルとしてデータをFrontendに返している
-          res.json(findTable);
-          return null;
-        },
-        //Promise Failed
-        failed => {
-          console.debug("ERROR:" + failed);
-          console.log("ERROR:Table Referencing Promise Failed...");
-          return null;
-        }
-      ).finally(() => {
-        console.log("Table Referencing Process Done!");
-      })
+      await models.user
+        .findAll()
+        .then(
+          //Promise Resolve
+          resolve => {
+            let findTable = JSON.stringify(resolve);
+            //JSONファイルとしてデータをFrontendに返している
+            res.json(findTable);
+            return null;
+          },
+          //Promise Failed
+          failed => {
+            console.debug("ERROR:" + failed);
+            console.error("Table Referencing Promise Failed...");
+            return null;
+          }
+        )
+        .finally(() => {
+          console.log("Table Referencing Process Done!");
+        });
     })();
+  });
 
+  //レコード更新を行うルーティング処理
+  app.post("/UpdateRecode", (req, res) => {
+    //モデルの読み込み
+    const models = require("./db/models/");
+
+    //登録データ（obj）を取得する
+    console.debug(req.body); //e.g. { office: 'Sendai', sex: 'male', name: 'Suzuki' }
+    let accountData = req.body; //e.g. accountData.name > Suzuki
+
+    //idで対象のレコードを探す
+
+
+    //DB更新（即時関数）
+    (async function UpdateRecode() {
+      await models.user
+        .update({
+          //データ更新なのでIDとCreatedAtは変える必要がない
+          name: accountData.name,
+          sex: accountData.sex,
+          office: accountData.office,
+          updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
+        })
+        .then(
+          //Promise Resolve
+          resolve => {
+            console.debug("Hello! " + resolve.name + " Updated!");
+            return null;
+          },
+          //Promise Failed
+          failed => {
+            console.debug("ERROR:" + failed);
+            console.error("Record Updating Promise Failed...");
+            return null;
+          }
+        )
+        .finally(() => {
+          res.send("Record Updating Process Done!");
+        });
+    })();
   });
 
   // app.use(express.json());

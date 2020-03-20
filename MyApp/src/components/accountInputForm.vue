@@ -5,14 +5,28 @@
 
     <input
       type="text"
+      v-model="accountData.id"
+      name="user_id"
+      placeholder="ユーザIDを入力して下さい"
+      v-bind:style="shownForm"
+    />
+    <br />
+
+    <input
+      type="text"
       v-model="accountData.name"
       name="user_name"
-      placeholder="新規ユーザー名"
+      v-bind:placeholder="placeholderWords"
     />
     <br />
 
     <input type="radio" v-model="accountData.sex" name="sex" value="male" />男性
-    <input type="radio" v-model="accountData.sex" name="sex" value="female" />女性
+    <input
+      type="radio"
+      v-model="accountData.sex"
+      name="sex"
+      value="female"
+    />女性
     <br />
 
     <select name="office_place" v-model="accountData.office">
@@ -25,11 +39,18 @@
     <!-- DB更新でアカウント情報更新 -->
     <input
       type="button"
-      v-bind:value="buttonName"
-      id="getCommunication"
-      @click="registrationProcess"
+      value="登録"
+      id="resistButton"
+      v-bind:style="shownResistButton"
+      @click="accountResist"
     />
-
+    <input
+      type="button"
+      value="更新"
+      id="updateButton"
+      v-bind:style="shownUpdateButton"
+      @click="accountUpdate"
+    />
   </div>
 </template>
 
@@ -38,12 +59,16 @@
 import axiosHttpCommunication from "../js/axios_http_communication.js";
 
 export default {
-  name: 'accountInputForm',
+  name: "accountInputForm",
   props: {
     msg: String,
-    buttonName: String 
+    placeholderWords: String,
+    //親コンポーネントからそれぞれのフォームのパーツの表示・非表示のCSSを受け取る
+    shownForm: String,
+    shownResistButton: String,
+    shownUpdateButton: String
   },
-data: function() {
+  data: function() {
     return {
       // ユーザーからの入力値(v-modelで参照)
       // isLoggedIn: false, // ログイン状態の判定
@@ -53,31 +78,48 @@ data: function() {
       // },
       //登録フォームのアカウント情報
       accountData: {
+        id: "",
         office: "",
         sex: "",
         name: ""
       },
       //アクセスカウンタ（初期値0）
       accessCount: 0,
-      //アカウント情報のDBのパス
-      DBFilePath: "../db/account_data.db",
       //DBサーバのドメイン
       DBFileServerPort: "http://localhost:8000"
     };
   },
-methods: {
-    //アカウント登録処理のメソッド（Controller）
-    registrationProcess: function() {
+  methods: {
+    //登録ボタンが押された場合
+    accountResist: function() {
       //入力フォームの値の例外処理を行う
-      this.exceptionHandling();
+      let buttonName = document.getElementById("resistButton").value;
+      this.exceptionHandling(buttonName);
       //ルーティングによってDB処理内容を変えている
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
-      this.axiosHttpCommunication(this.DBFileServerPort+"/RecordInsert");
+      this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
+    },
+    //更新ボタンが押された場合
+    accountUpdate: function() {
+      //入力フォームの値の例外処理を行う
+      let buttonName = document.getElementById("updateButton").value;
+      this.exceptionHandling(buttonName);
+      //DBのアカウント情報を更新する
+      this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecode");
     },
     //入力フォームの例外処理のメソッド
-    exceptionHandling: function() {
+    //押されたボタン(buttonNamePushed)で例外処理の内容が変わるので場合分けをしている
+    exceptionHandling: function(buttonNamePushed) {
       try {
-        //名前が入力されてないときの例外処理
+        //IDをチェック（新規登録の場合は行わない）
+        if (buttonNamePushed == "更新") {
+          if (!this.accountData.id) {
+            alert("ユーザーIDは数字で入力してください");
+            throw new Error("INVALID_USERID_ERR");
+          }
+        }
+
+        //名前をチェック
         if (!this.accountData.name) {
           alert("名前を入力してください");
           throw new Error("INVALID_USERNAME_ERR");
@@ -93,7 +135,7 @@ methods: {
           throw new Error("INVALID_SEX_ERR");
         }
 
-        //事業所が選択されてない場合の例外処理
+        //事業所をチェック
         if (!this.accountData.office) {
           alert("事業所を選択してください");
           throw new Error("INVALID_OFFICE_ERR");
@@ -110,13 +152,11 @@ methods: {
     axiosHttpCommunication: function(DestinationURL) {
       console.debug("called axiosHttpCommunication!");
       //POST通信でDBへアカウント情報（レコード）を追加する
-      axiosHttpCommunication(DestinationURL,"POST",this.accountData);
+      axiosHttpCommunication(DestinationURL, "POST", this.accountData);
     }
   }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
-</style>
+<style scoped></style>
