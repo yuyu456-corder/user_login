@@ -3,7 +3,7 @@ node_modules
 /dist
 
 # DB本体はコミットしてるので、2度目以降DB内に個人情報等が入る等のインシデントを防ぐ
-Backend/account.sqlite
+*.sqlite
 
 # local env files
 .env.local

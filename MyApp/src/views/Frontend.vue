@@ -4,21 +4,24 @@
     <h1>ログイン画面</h1>
     <h2>新規登録</h2>
 
+    <!-- 新規登録フォーム -->
     <accountInputForm
-      placeholderWords="新規ユーザー名"
-      shownForm="display:none"
+      placeholderWordsUserName="新規ユーザー名"
+      shownIdForm="display: none"
       shownResistButton=""
-      shownUpdateButton="display:none"
+      shownUpdateButton="display: none"
       class="accountRedisterForm"
     />
 
+    <!-- 情報変更フォーム -->
+    <!-- 本来はログインしたユーザーが自分の情報を更新する際に用いる -->
     <h2>アカウント情報変更</h2>
-    <p>既にアカウントを変更しているユーザが対象です</p>
+    <p>既にアカウントを変更しているユーザーが対象です</p>
 
     <accountInputForm
-      placeholderWords="変更ユーザー名"
-      shownForm=""
-      shownResistButton="display:none"
+      placeholderWordsUserName="変更ユーザー名"
+      shownIdForm=""
+      shownResistButton="display: none"
       shownUpdateButton=""
       class="accountUpdateForm"
     />

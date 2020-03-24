@@ -3,20 +3,22 @@
     <!-- アカウント情報入力用のコンポーネント -->
     <!-- Frontend.vueから値を受け取って適宜値を変更している -->
 
+    <!-- ID入力欄 -->
     <input
       type="text"
       v-model="accountData.id"
       name="user_id"
-      placeholder="ユーザIDを入力して下さい"
-      v-bind:style="shownForm"
+      placeholder="ユーザーID"
+      v-bind:style="shownIdForm"
     />
     <br />
 
+    <!-- ユーザー名入力欄 -->
     <input
       type="text"
       v-model="accountData.name"
       name="user_name"
-      v-bind:placeholder="placeholderWords"
+      v-bind:placeholder=placeholderWordsUserName
     />
     <br />
 
@@ -33,6 +35,8 @@
       <option value="" disabled selected>事業所選択</option>
       <option value="Tokyo">東京事業所</option>
       <option value="Osaka">大阪事業所</option>
+      <option value="Sendai">仙台事業所</option>
+      <option value="Sapporo">札幌事業所</option>
       <!-- 他の事業所も追加可能 -->
     </select>
 
@@ -62,9 +66,10 @@ export default {
   name: "accountInputForm",
   props: {
     msg: String,
-    placeholderWords: String,
-    //親コンポーネントからそれぞれのフォームのパーツの表示・非表示のCSSを受け取る
-    shownForm: String,
+    placeholderWordsUserName: String,
+    placeholderWordsId: String,
+    // 親コンポーネントから受け取った値で各パーツの表示・非表示を決定
+    shownIdForm: String,
     shownResistButton: String,
     shownUpdateButton: String
   },
@@ -86,7 +91,9 @@ export default {
       //アクセスカウンタ（初期値0）
       accessCount: 0,
       //DBサーバのドメイン
-      DBFileServerPort: "http://localhost:8000"
+      DBFileServerPort: "http://localhost:8000",
+      //サーバからのレスポンスデータを受け取る変数
+      responseData: ""
     };
   },
   methods: {
@@ -100,11 +107,12 @@ export default {
       this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
     },
     //更新ボタンが押された場合
-    accountUpdate: function() {
+    accountUpdate: async function() {
       //入力フォームの値の例外処理を行う
       let buttonName = document.getElementById("updateButton").value;
       this.exceptionHandling(buttonName);
       //DBのアカウント情報を更新する
+      //issue:exceptionHandlingでエラーを返してもaxios~は呼ばれるためDBにCRUD処理がされてしまう
       this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecode");
     },
     //入力フォームの例外処理のメソッド
@@ -116,6 +124,12 @@ export default {
           if (!this.accountData.id) {
             alert("ユーザーIDは数字で入力してください");
             throw new Error("INVALID_USERID_ERR");
+          }
+          //ダイアログでキャンセル押下時は更新作業を行わない
+          let checkConfilm = confirm("入力内容を確認してください。このアカウント情報に更新してもいいですか？");
+          if(checkConfilm == false){
+            alert("ユーザー情報の更新をキャンセルしました");
+            return;
           }
         }
 

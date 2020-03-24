@@ -20,14 +20,14 @@ export default (app, http) => {
   });
 
   //ルーティングによって行うCRUD処理を切り替えている
-  //レコード挿入を行うルーティング処理
+  //レコード挿入(INSERT)を行うルーティング処理
   app.post("/RecordInsert", (req, res) => {
     //モデルのインポート、同時にDBも読み込んでいる
     //modelsディレクトリのindex.jsも見てそこ経由でconfig.jsonでDB情報も取得している
     const models = require("./db/models/");
 
     //登録データ（obj）を取得する
-    console.debug(req.body); //e.g. { office: 'Sendai', sex: 'male', name: 'Suzuki' }
+    console.debug(req.body); //e.g. { office: 'Osaka', sex: 'male', name: 'Suzuki' }
     let accountData = req.body; //e.g. accountData.name > Suzuki
 
     //レコード挿入(即時関数)
@@ -62,7 +62,7 @@ export default (app, http) => {
     })();
   });
 
-  //レコード参照を行うルーティング処理
+  //レコード参照(READ)を行うルーティング処理
   app.get("/ReferenceTable", (req, res) => {
     //モデルの読み込み
     const models = require("./db/models/");
@@ -95,43 +95,70 @@ export default (app, http) => {
     })();
   });
 
-  //レコード更新を行うルーティング処理
+  //レコード更新(UPDATE)を行うルーティング処理
   app.post("/UpdateRecode", (req, res) => {
     //モデルの読み込み
     const models = require("./db/models/");
 
     //登録データ（obj）を取得する
-    console.debug(req.body); //e.g. { office: 'Sendai', sex: 'male', name: 'Suzuki' }
+    console.debug(req.body); //e.g. { id: 3 'Osaka', sex: 'male', name: 'Suzuki' }
     let accountData = req.body; //e.g. accountData.name > Suzuki
 
-    //idで対象のレコードを探す
-
-
-    //DB更新（即時関数）
+    //DB更新（即時関数)
     (async function UpdateRecode() {
+
+      //DBに存在しないIDでリクエストが来たら処理を中断する
+      //リクエストのIDをDBから取得させてNullかどうかで判断する
+      //SELECT id FROM users WHERE id = accountData.id
+      // await models.user
+      //   .findAll({
+      //     attributes: [id]
+      //   },
+      //     {
+      //       where: {
+      //         id: accountData.id
+      //       }
+      //     }).then(
+      //       resolve => {
+      //         console.log("requestID is existed!");
+      //       },
+      //       failed => {
+      //         console.error("Request ID is not exist... :" + failed);
+      //         res.send("入力されたIDが存在しません");
+      //       }
+      //     )
+
       await models.user
-        .update({
-          //データ更新なのでIDとCreatedAtは変える必要がない
-          name: accountData.name,
-          sex: accountData.sex,
-          office: accountData.office,
-          updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
-        })
+        .update(
+          {
+            //データ更新なのでIDとCreatedAtは変える必要がない
+            name: accountData.name,
+            sex: accountData.sex,
+            office: accountData.office,
+            updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
+          },
+          {
+            //更新すべきレコードをaccountData.idから決定する
+            where: {
+              id: accountData.id
+            }
+          }
+        )
         .then(
           //Promise Resolve
           resolve => {
             console.debug("Hello! " + resolve.name + " Updated!");
-            return null;
+            res.send("アカウント情報の更新に成功しました");
           },
           //Promise Failed
           failed => {
             console.debug("ERROR:" + failed);
             console.error("Record Updating Promise Failed...");
-            return null;
+            res.send("アカウント情報の更新に失敗しました");
           }
         )
         .finally(() => {
-          res.send("Record Updating Process Done!");
+          console.log("Record Updating Process Done!");
         });
     })();
   });
