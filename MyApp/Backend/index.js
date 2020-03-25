@@ -46,7 +46,7 @@ export default (app, http) => {
         .then(
           //Promise Resolve
           resolve => {
-            console.debug("Hello! " + resolve.name + " Inserted!");
+            console.debug("Hello! " + accountData.name + " Inserted!");
             return null;
           },
           //Promise Failed
@@ -108,26 +108,15 @@ export default (app, http) => {
     (async function UpdateRecode() {
 
       //DBに存在しないIDでリクエストが来たら処理を中断する
-      //リクエストのIDをDBから取得させてNullかどうかで判断する
-      //SELECT id FROM users WHERE id = accountData.id
-      // await models.user
-      //   .findAll({
-      //     attributes: [id]
-      //   },
-      //     {
-      //       where: {
-      //         id: accountData.id
-      //       }
-      //     }).then(
-      //       resolve => {
-      //         console.log("requestID is existed!");
-      //       },
-      //       failed => {
-      //         console.error("Request ID is not exist... :" + failed);
-      //         res.send("入力されたIDが存在しません");
-      //       }
-      //     )
+      //findByPk : find By Primary Key
+      await models.user.findByPk(accountData.id).then(
+        resolve => {
+          console.error("Request ID is not exist..."); //resolve = null
+          res.send("入力されたIDが存在しません");
+        }
+      );
 
+      //SQL文： UPDATE users SET arg1 WHERE accountData.id
       await models.user
         .update(
           {
@@ -147,7 +136,7 @@ export default (app, http) => {
         .then(
           //Promise Resolve
           resolve => {
-            console.debug("Hello! " + resolve.name + " Updated!");
+            console.debug("Hello! " + accountData.name + " Updated!");
             res.send("アカウント情報の更新に成功しました");
           },
           //Promise Failed
