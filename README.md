@@ -7,9 +7,9 @@
 
 - MyApp :vue-cliで構築されたプロジェクトファイル
     - MyApp/src/ :フロントエンド側のファイルをまとめたディレクトリ
-        - MyApp/src/js/axios_http_communication.js :HTTP通信を行うJSモジュール
+        - MyApp/src/js/axios_http_communication.js :HTTP
+        通信を行うJSモジュール
         - MyApp/src/views/Frontend.vue :フロントエンドのviewの中核になるファイル
-        - MyApp/src/component/accountInputForm.vue :入力フォームのコンポーネント
 - MyApp/Backend/ :バックエンド側のファイルをまとめたディレクトリ
     - MyApp/Backend/index.js :Backend側の処理を行うJSファイル
     - MyApp/Backend/db :DB関連ファイルをまとめたディレクトリ
@@ -23,8 +23,9 @@
     - 各フォームの例外処理にも対応
 - アカウント参照
     - Frontendで登録したアカウントデータをAdministrator PageでDB経由で参照する
-- アカウント削除（不具合対応中）
-    - ボタンクリックで対応したアカウントを削除 （ハンドラが上手く動作せず対応したアカウントを削除できない）
+- アカウント更新
+    - アカウント情報変更フォームで入力したIDを元に既に登録しているアカウント情報を更新する
+    - 登録されていないIDが入力された場合は更新作業を行わない
 - ~~アカウント表示・非表示機能（未対応）~~
     - ~~vue.jsのshownプロパティのtrue,falseでブラウザ上に表示させるかを決定~~
     - ~~現状、JSファイルベタ打ちでのみでしか対応できていない~~
@@ -51,13 +52,16 @@
     - 1アカウントにつき1文字にしか反映されない
     - 2文字以上は未対応
     - CRUD処理実装中のため、この機能はマージしていない
+- アカウント更新時に登録していないIDでの例外処理時にサーバー側の処理が終わらずターミナル上にエラーが出る
+    - ブラウザ上では例外処理はされている
+- アカウント更新時の確認ダイアログのキャンセルを押しても、更新作業がされてしまう。
 
 ## 開発環境
  - VSCode/Git
  - JavaScript
     - Vue.js (framework)
     - Express.js (framework)
-    - axios (npm package)
-    - Vue CLI (npm package)
-    - sequelize (npm package)
+    - axios (npm Library)
+    - Vue CLI (npm Library)
+    - sequelize (npm Library)
 - SQLite
