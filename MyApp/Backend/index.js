@@ -10,6 +10,13 @@ export default (app, http) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  //エラーハンドリング用のミドルウェア(全てのミドルウェアの最後で呼び出す)
+  //next(new Error)で各ルーティング経由で呼ばれる
+  app.use(function errorHandler(err, req, res, next) {
+    console.log(err);
+    res.send(err);
+  });
+
   //CRUD処理に必要なライブラリのインポート
   const sqlite3 = require("sqlite3").verbose();
   const { Sequelize } = require("sequelize");
@@ -51,8 +58,7 @@ export default (app, http) => {
           },
           //Promise Failed
           failed => {
-            console.debug("ERROR:" + failed);
-            console.error("Record Inserting Promise Failed...");
+            console.error("Record Inserting Promise Failed by:" + failed);
             return null;
           }
         )
@@ -84,8 +90,7 @@ export default (app, http) => {
           },
           //Promise Failed
           failed => {
-            console.debug("ERROR:" + failed);
-            console.error("Table Referencing Promise Failed...");
+            console.error("Table Referencing Promise Failed by:" + failed);
             return null;
           }
         )
@@ -95,8 +100,42 @@ export default (app, http) => {
     })();
   });
 
+  //入力フォームのIDが有効かチェックするルーティング処理
+  app.post("/UpdateRecode", (req, res, next) => {
+    const models = require("./db/models/");
+
+    //登録データ（obj）を取得する
+    console.debug(req.body); //e.g. { id: 3 'Osaka', sex: 'male', name: 'Suzuki' }
+    let accountData = req.body; //e.g. accountData.name > Suzuki
+
+    //DBに存在しないIDでリクエストが来たら処理を中断する
+    //findByPk : find By Primary Key
+    (async function () {
+      await models.user
+        .findByPk(accountData.id)
+        //Promise Resolve
+        .then(
+          resolve => {
+            //リクエストIDがDBに存在しなかったらエラーハンドリング用のミドルウェアにルーティングしてこのルートでの作業は中断する
+            if (resolve === null) {
+              return next(new Error("Request Id is Invalid"));
+            } else {
+              //入力IDに問題が無ければ引き続き同じルーティング処理（/UpdateRecode）へ
+              console.log("Request Id is Valid");
+              next();
+            }
+            return null;
+          },
+          //Promise Failed
+          failed => {
+            console.error("find By Primary Key Promise Failed by: " + failed);
+          }
+        );
+    }())
+  })
+
   //レコード更新(UPDATE)を行うルーティング処理
-  app.post("/UpdateRecode", (req, res) => {
+  app.post("/UpdateRecode", (req, res, next) => {
     //モデルの読み込み
     const models = require("./db/models/");
 
@@ -106,15 +145,6 @@ export default (app, http) => {
 
     //DB更新（即時関数)
     (async function UpdateRecode() {
-
-      //DBに存在しないIDでリクエストが来たら処理を中断する
-      //findByPk : find By Primary Key
-      await models.user.findByPk(accountData.id).then(
-        resolve => {
-          console.error("Request ID is not exist..."); //resolve = null
-          res.send("入力されたIDが存在しません");
-        }
-      );
 
       //SQL文： UPDATE users SET arg1 WHERE accountData.id
       await models.user
@@ -141,8 +171,7 @@ export default (app, http) => {
           },
           //Promise Failed
           failed => {
-            console.debug("ERROR:" + failed);
-            console.error("Record Updating Promise Failed...");
+            console.error("Record Updating Promise Failed by:" + failed);
             res.send("アカウント情報の更新に失敗しました");
           }
         )
@@ -152,19 +181,4 @@ export default (app, http) => {
     })();
   });
 
-  // app.use(express.json());
-  //
-  // app.post('/bar', (req, res) => {
-  //   res.json(req.body);
-  // });
-  //
-  // optional support for socket.io
-  //
-  // let io = socketIO(http);
-  // io.on("connection", client => {
-  //   client.on("message", function(data) {
-  //     // do something
-  //   });
-  //   client.emit("message", "Welcome");
-  // });
 };
