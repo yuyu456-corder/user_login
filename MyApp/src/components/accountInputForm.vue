@@ -3,7 +3,7 @@
     <!-- アカウント情報入力用のコンポーネント -->
     <!-- Frontend.vueから値を受け取って適宜値を変更している -->
 
-    <!-- ID入力欄 -->
+    <!-- ID入力欄。表示するのはユーザー情報変更時のみ -->
     <span v-if="formType === 'update'">
       <input type="text" v-model="accountData.id" name="user_id" placeholder="ユーザーID" />
     </span>
@@ -18,9 +18,9 @@
     />
     <br />
 
-    <!-- パスワード入力欄 -->
+    <!-- パスワード入力欄。type=passwordにより、入力値がマスクされる -->
     <input
-      type="text"
+      type="password" 
       v-model="accountData.password"
       name="password"
       :placeholder="passwordPlaceholder"
@@ -40,7 +40,7 @@
       <!-- 他の事業所も追加可能 -->
     </select>
 
-    <!-- DB更新でアカウント情報更新 -->
+    <!-- どのフォームかによって、送信ボタンのテキストを変える -->
     <input v-if="formType==='register'"
       type="button"
       value="登録"
@@ -113,7 +113,7 @@ export default {
     accountResist: function() {
       //入力フォームの値の例外処理を行う
       let buttonName = document.getElementById("resistButton").value;
-      this.exceptionHandling(buttonName);
+      if(!this.validateForms(buttonName)) return;
       //ルーティングによってDB処理内容を変えている
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
       this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
@@ -122,14 +122,15 @@ export default {
     accountUpdate: async function() {
       //入力フォームの値の例外処理を行う
       let buttonName = document.getElementById("updateButton").value;
-      this.exceptionHandling(buttonName);
+      if(!this.validateForms(buttonName)) return;
+
       //DBのアカウント情報を更新する
       //issue:exceptionHandlingでエラーを返してもaxios~は呼ばれるためDBにCRUD処理がされてしまう
       this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecode");
     },
     //入力フォームの例外処理のメソッド
     //押されたボタン(buttonNamePushed)で例外処理の内容が変わるので場合分けをしている
-    exceptionHandling: function(buttonNamePushed) {
+    validateForms: function(buttonNamePushed) {
       try {
         //IDをチェック（新規登録の場合は行わない）
         if (buttonNamePushed == "更新") {
@@ -143,7 +144,7 @@ export default {
           );
           if (checkConfilm == false) {
             alert("ユーザー情報の更新をキャンセルしました");
-            return;
+            return false;
           }
         }
 
@@ -173,8 +174,11 @@ export default {
         console.error("入力が不完全のため、登録を中止しました");
         console.log(error);
         // ユーザーからの入力が不完全なので、exceptionHandlingメソッドはここで中止する
-        return;
+        return false;
       }
+      
+      // 全てのフォームが問題なく入力されていたらOKを出す
+      return true
     },
     // DBにアカウント情報を追加する
     axiosHttpCommunication: function(DestinationURL) {
