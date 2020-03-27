@@ -1,22 +1,14 @@
 <template>
   <div class="frontend">
     <img alt="Vue logo" src="../assets/logo.png" />
-    <h1>ログイン画面</h1>
-    <h2>新規登録</h2>
+    <h1>新規登録</h1>
 
     <!-- 新規登録フォーム -->
     <accountInputForm
       formType="register"
     />
 
-    <!-- 情報変更フォーム -->
-    <!-- 本来はログインしたユーザーが自分の情報を更新する際に用いる -->
-    <h2>アカウント情報変更</h2>
-    <p>既にアカウントを変更しているユーザーが対象です</p>
-
-    <accountInputForm
-      formType="update"
-    />
+    
 
     <p>あなたは{{ accessCount }}人目の訪問者です！</p>
 

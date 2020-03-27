@@ -2,6 +2,8 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Frontend</router-link> |
+      <router-link to="/login">Login</router-link> |
+      <router-link to="/update">Update</router-link> |
       <router-link to="/AdministratorPage">Administrator Page</router-link>
     </div>
     <router-view/>
