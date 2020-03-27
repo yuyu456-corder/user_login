@@ -20,7 +20,7 @@
 
     <!-- パスワード入力欄。type=passwordにより、入力値がマスクされる -->
     <input
-      type="password" 
+      type="password"
       v-model="accountData.password"
       name="password"
       :placeholder="passwordPlaceholder"
@@ -41,19 +41,22 @@
     </select>
 
     <!-- どのフォームかによって、送信ボタンのテキストを変える -->
-    <input v-if="formType==='register'"
+    <input
+      v-if="formType==='register'"
       type="button"
       value="登録"
       id="resistButton"
       @click="accountResist"
     />
-    <input v-else-if="formType==='update'"
+    <input
+      v-else-if="formType==='update'"
       type="button"
       value="更新"
       id="updateButton"
       @click="accountUpdate"
     />
-    <input v-else-if="formType==='login'"
+    <input
+      v-else-if="formType==='login'"
       type="button"
       value="ログイン"
       id="loginButton"
@@ -113,7 +116,7 @@ export default {
     accountResist: function() {
       //入力フォームの値の例外処理を行う
       let buttonName = document.getElementById("resistButton").value;
-      if(!this.validateForms(buttonName)) return;
+      if (!this.validateForms(buttonName)) return;
       //ルーティングによってDB処理内容を変えている
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
       this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
@@ -122,7 +125,16 @@ export default {
     accountUpdate: async function() {
       //入力フォームの値の例外処理を行う
       let buttonName = document.getElementById("updateButton").value;
-      if(!this.validateForms(buttonName)) return;
+      if (!this.validateForms(buttonName)) return;
+
+      //ダイアログでキャンセル押下時は更新作業を行わない
+      let checkConfilm = confirm(
+        "入力内容を確認してください。このアカウント情報に更新してもいいですか？"
+      );
+      if (checkConfilm == false) {
+        alert("ユーザー情報の更新をキャンセルしました");
+        return;
+      }
 
       //DBのアカウント情報を更新する
       //issue:exceptionHandlingでエラーを返してもaxios~は呼ばれるためDBにCRUD処理がされてしまう
@@ -137,14 +149,6 @@ export default {
           if (!this.accountData.id) {
             alert("ユーザーIDは数字で入力してください");
             throw new Error("INVALID_USERID_ERR");
-          }
-          //ダイアログでキャンセル押下時は更新作業を行わない
-          let checkConfilm = confirm(
-            "入力内容を確認してください。このアカウント情報に更新してもいいですか？"
-          );
-          if (checkConfilm == false) {
-            alert("ユーザー情報の更新をキャンセルしました");
-            return false;
           }
         }
 
@@ -176,9 +180,9 @@ export default {
         // ユーザーからの入力が不完全なので、exceptionHandlingメソッドはここで中止する
         return false;
       }
-      
+
       // 全てのフォームが問題なく入力されていたらOKを出す
-      return true
+      return true;
     },
     // DBにアカウント情報を追加する
     axiosHttpCommunication: function(DestinationURL) {
