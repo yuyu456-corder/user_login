@@ -6,11 +6,7 @@
 
     <!-- 新規登録フォーム -->
     <accountInputForm
-      placeholderWordsUserName="新規ユーザー名"
-      shownIdForm="display: none"
-      shownResistButton=""
-      shownUpdateButton="display: none"
-      class="accountRedisterForm"
+      formType="register"
     />
 
     <!-- 情報変更フォーム -->
@@ -19,11 +15,7 @@
     <p>既にアカウントを変更しているユーザーが対象です</p>
 
     <accountInputForm
-      placeholderWordsUserName="変更ユーザー名"
-      shownIdForm=""
-      shownResistButton="display: none"
-      shownUpdateButton=""
-      class="accountUpdateForm"
+      formType="update"
     />
 
     <p>あなたは{{ accessCount }}人目の訪問者です！</p>

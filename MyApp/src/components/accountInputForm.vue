@@ -4,13 +4,9 @@
     <!-- Frontend.vueから値を受け取って適宜値を変更している -->
 
     <!-- ID入力欄 -->
-    <input
-      type="text"
-      v-model="accountData.id"
-      name="user_id"
-      placeholder="ユーザーID"
-      v-bind:style="shownIdForm"
-    />
+    <span v-if="formType === 'update'">
+      <input type="text" v-model="accountData.id" name="user_id" placeholder="ユーザーID" />
+    </span>
     <br />
 
     <!-- ユーザー名入力欄 -->
@@ -18,21 +14,25 @@
       type="text"
       v-model="accountData.name"
       name="user_name"
-      v-bind:placeholder=placeholderWordsUserName
+      :placeholder="userNamePlaceholder"
+    />
+    <br />
+
+    <!-- パスワード入力欄 -->
+    <input
+      type="text"
+      v-model="accountData.password"
+      name="password"
+      :placeholder="passwordPlaceholder"
     />
     <br />
 
     <input type="radio" v-model="accountData.sex" name="sex" value="male" />男性
-    <input
-      type="radio"
-      v-model="accountData.sex"
-      name="sex"
-      value="female"
-    />女性
+    <input type="radio" v-model="accountData.sex" name="sex" value="female" />女性
     <br />
 
     <select name="office_place" v-model="accountData.office">
-      <option value="" disabled selected>事業所選択</option>
+      <option value disabled selected>事業所選択</option>
       <option value="Tokyo">東京事業所</option>
       <option value="Osaka">大阪事業所</option>
       <option value="Sendai">仙台事業所</option>
@@ -41,18 +41,22 @@
     </select>
 
     <!-- DB更新でアカウント情報更新 -->
-    <input
+    <input v-if="formType==='register'"
       type="button"
       value="登録"
       id="resistButton"
-      v-bind:style="shownResistButton"
       @click="accountResist"
     />
-    <input
+    <input v-else-if="formType==='update'"
       type="button"
       value="更新"
       id="updateButton"
-      v-bind:style="shownUpdateButton"
+      @click="accountUpdate"
+    />
+    <input v-else-if="formType==='login'"
+      type="button"
+      value="ログイン"
+      id="loginButton"
       @click="accountUpdate"
     />
   </div>
@@ -66,12 +70,7 @@ export default {
   name: "accountInputForm",
   props: {
     msg: String,
-    placeholderWordsUserName: String,
-    placeholderWordsId: String,
-    // 親コンポーネントから受け取った値で各パーツの表示・非表示を決定
-    shownIdForm: String,
-    shownResistButton: String,
-    shownUpdateButton: String
+    formType: String // either of "update", "register", "login"
   },
   data: function() {
     return {
@@ -86,7 +85,8 @@ export default {
         id: "",
         office: "",
         sex: "",
-        name: ""
+        name: "",
+        password: ""
       },
       //アクセスカウンタ（初期値0）
       accessCount: 0,
@@ -95,6 +95,18 @@ export default {
       //サーバからのレスポンスデータを受け取る変数
       responseData: ""
     };
+  },
+  computed: {
+    userNamePlaceholder: function() {
+      if (this.formType === "update") return "新しいユーザー名";
+      if (this.formType === "register") return "新規ユーザー名";
+      if (this.formType === "login") return "ユーザー名";
+    },
+    passwordPlaceholder: function() {
+      if (this.formType === "update") return "新しいパスワード";
+      if (this.formType === "register") return "パスワード";
+      if (this.formType === "login") return "パスワード";
+    }
   },
   methods: {
     //登録ボタンが押された場合
@@ -126,8 +138,10 @@ export default {
             throw new Error("INVALID_USERID_ERR");
           }
           //ダイアログでキャンセル押下時は更新作業を行わない
-          let checkConfilm = confirm("入力内容を確認してください。このアカウント情報に更新してもいいですか？");
-          if(checkConfilm == false){
+          let checkConfilm = confirm(
+            "入力内容を確認してください。このアカウント情報に更新してもいいですか？"
+          );
+          if (checkConfilm == false) {
             alert("ユーザー情報の更新をキャンセルしました");
             return;
           }
