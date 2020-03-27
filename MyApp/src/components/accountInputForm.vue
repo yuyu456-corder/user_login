@@ -27,18 +27,22 @@
     />
     <br />
 
-    <input type="radio" v-model="accountData.sex" name="sex" value="male" />男性
-    <input type="radio" v-model="accountData.sex" name="sex" value="female" />女性
-    <br />
+    <p v-if="loginFailed" style="color: red">ログインに失敗しました。</p>
 
-    <select name="office_place" v-model="accountData.office">
-      <option value disabled selected>事業所選択</option>
-      <option value="Tokyo">東京事業所</option>
-      <option value="Osaka">大阪事業所</option>
-      <option value="Sendai">仙台事業所</option>
-      <option value="Sapporo">札幌事業所</option>
-      <!-- 他の事業所も追加可能 -->
-    </select>
+    <div v-if="formType === 'register' || formType === 'update'">
+      <input type="radio" v-model="accountData.sex" name="sex" value="male" />男性
+      <input type="radio" v-model="accountData.sex" name="sex" value="female" />女性
+      <br />
+
+      <select name="office_place" v-model="accountData.office">
+        <option value disabled selected>事業所選択</option>
+        <option value="Tokyo">東京事業所</option>
+        <option value="Osaka">大阪事業所</option>
+        <option value="Sendai">仙台事業所</option>
+        <option value="Sapporo">札幌事業所</option>
+        <!-- 他の事業所も追加可能 -->
+      </select>
+    </div>
 
     <!-- どのフォームかによって、送信ボタンのテキストを変える -->
     <input
@@ -60,7 +64,7 @@
       type="button"
       value="ログイン"
       id="loginButton"
-      @click="accountUpdate"
+      @click="accountLogin"
     />
   </div>
 </template>
@@ -96,7 +100,10 @@ export default {
       //DBサーバのドメイン
       DBFileServerPort: "http://localhost:8000",
       //サーバからのレスポンスデータを受け取る変数
-      responseData: ""
+      responseData: "",
+
+      // Boolean to show if the login attempt is successful
+      loginFailed: false
     };
   },
   computed: {
@@ -119,6 +126,20 @@ export default {
       //ルーティングによってDB処理内容を変えている
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
       this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
+    },
+    accountLogin: async function() {
+      const axios = require("axios");
+
+      if (!this.validateForms()) return;
+
+      try {
+        await axios.post(this.DBFileServerPort + "/login", this.accountData);
+      } catch (err) {
+        this.loginFailed = true;
+        return;
+      }
+      this.loginFailed = false;
+      alert("ログインに成功しました");
     },
     //更新ボタンが押された場合
     accountUpdate: async function() {
@@ -154,6 +175,15 @@ export default {
           alert("名前を入力してください");
           throw new Error("INVALID_USERNAME_ERR");
         }
+
+        // パスワードをチェック
+        if (!this.accountData.password) {
+          alert("パスワードを入力してください");
+          throw new Error("INVALID_PASSWORD_ERR");
+        }
+
+        // ログインの場合には性別や事業所は選択しないので、ここでフォーム検証は終わり
+        if (this.formType == "login") return true;
 
         //ラジオボタンの入力状況で男女を区別、pushする文字列（M,F）を確定する
         if (this.accountData.sex == "male") {
