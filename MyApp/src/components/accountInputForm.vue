@@ -1,15 +1,18 @@
 <template>
   <div>
     <!-- アカウント情報入力用のコンポーネント -->
-    <!-- Frontend.vueから値を受け取って適宜値を変更している -->
+    <!-- Frontend.vueからフォーム種別の指定を受け取って表示内容を変更している -->
 
-    <!-- ID入力欄。表示するのはユーザー情報変更時のみ -->
+    <!-- ID入力欄
+    表示するのはユーザー情報変更時のみ-->
     <span v-if="formType === 'update'">
       <input type="text" v-model="accountData.id" name="user_id" placeholder="ユーザーID" />
     </span>
     <br />
 
-    <!-- ユーザー名入力欄 -->
+    <!-- ユーザー名入力欄
+    フォーム種別によって微妙にplaceholderの中身が違うのでcomputed属性で対応
+    -->
     <input
       type="text"
       v-model="accountData.name"
@@ -18,7 +21,8 @@
     />
     <br />
 
-    <!-- パスワード入力欄。type=passwordにより、入力値がマスクされる -->
+    <!-- パスワード入力欄
+    type=passwordにより、入力値がマスクされる-->
     <input
       type="password"
       v-model="accountData.password"
@@ -29,6 +33,7 @@
 
     <p v-if="loginFailed" style="color: red">ログインに失敗しました。</p>
 
+    <!-- 情報更新時か新規作成時にのみ選択する項目 -->
     <div v-if="formType === 'register' || formType === 'update'">
       <input type="radio" v-model="accountData.sex" name="sex" value="male" />男性
       <input type="radio" v-model="accountData.sex" name="sex" value="female" />女性
@@ -119,19 +124,22 @@ export default {
     }
   },
   methods: {
-    //登録ボタンが押された場合
+    // 登録ボタンが押された場合
     accountRegister: function() {
-      //入力フォームの値の例外処理を行う
+      // 入力フォームの値の検証処理を行う
       if (!this.validateForms()) return;
       //ルーティングによってDB処理内容を変えている
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
       this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
     },
+    // ログインボタンが押された場合
     accountLogin: async function() {
       const axios = require("axios");
 
       if (!this.validateForms()) return;
 
+      // ユーザ名・パスワードが不正なら403を返すようにBackendはなっている
+      // レスポンスとして403が返ってくるとVueはエラーを投げるようなので、それを捕捉する
       try {
         await axios.post(this.DBFileServerPort + "/login", this.accountData);
       } catch (err) {
@@ -155,14 +163,15 @@ export default {
       }
 
       //DBのアカウント情報を更新する
-      //issue:exceptionHandlingでエラーを返してもaxios~は呼ばれるためDBにCRUD処理がされてしまう
       this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecode");
     },
-    //入力フォームの例外処理のメソッド
-    //押されたボタン(buttonNamePushed)で例外処理の内容が変わるので場合分けをしている
+    /**
+     * 入力フォームの例外処理のメソッド
+     * @returns {boolean} - 全項目入力されていればtrue, されていなければfalse
+     */
     validateForms: function() {
       try {
-        //IDをチェック（新規登録の場合は行わない）
+        //IDをチェック（情報更新の場合のみ選択する）
         if (this.formType == "update") {
           if (!this.accountData.id) {
             alert("ユーザーIDは数字で入力してください");
@@ -186,11 +195,7 @@ export default {
         if (this.formType == "login") return true;
 
         //ラジオボタンの入力状況で男女を区別、pushする文字列（M,F）を確定する
-        if (this.accountData.sex == "male") {
-          var sexTmp = "M";
-        } else if (this.accountData.sex == "female") {
-          var sexTmp = "F";
-        } else {
+        if (!this.accountData.sex) {
           alert("性別を選択してください");
           throw new Error("INVALID_SEX_ERR");
         }
