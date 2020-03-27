@@ -45,8 +45,8 @@
       v-if="formType==='register'"
       type="button"
       value="登録"
-      id="resistButton"
-      @click="accountResist"
+      id="registerButton"
+      @click="accountRegister"
     />
     <input
       v-else-if="formType==='update'"
@@ -107,25 +107,22 @@ export default {
     },
     passwordPlaceholder: function() {
       if (this.formType === "update") return "新しいパスワード";
-      if (this.formType === "register") return "パスワード";
+      if (this.formType === "register") return "新規パスワード";
       if (this.formType === "login") return "パスワード";
     }
   },
   methods: {
     //登録ボタンが押された場合
-    accountResist: function() {
+    accountRegister: function() {
       //入力フォームの値の例外処理を行う
-      let buttonName = document.getElementById("resistButton").value;
-      if (!this.validateForms(buttonName)) return;
+      if (!this.validateForms()) return;
       //ルーティングによってDB処理内容を変えている
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
       this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
     },
     //更新ボタンが押された場合
     accountUpdate: async function() {
-      //入力フォームの値の例外処理を行う
-      let buttonName = document.getElementById("updateButton").value;
-      if (!this.validateForms(buttonName)) return;
+      if (!this.validateForms()) return;
 
       //ダイアログでキャンセル押下時は更新作業を行わない
       let checkConfilm = confirm(
@@ -142,10 +139,10 @@ export default {
     },
     //入力フォームの例外処理のメソッド
     //押されたボタン(buttonNamePushed)で例外処理の内容が変わるので場合分けをしている
-    validateForms: function(buttonNamePushed) {
+    validateForms: function() {
       try {
         //IDをチェック（新規登録の場合は行わない）
-        if (buttonNamePushed == "更新") {
+        if (this.formType == "update") {
           if (!this.accountData.id) {
             alert("ユーザーIDは数字で入力してください");
             throw new Error("INVALID_USERID_ERR");
