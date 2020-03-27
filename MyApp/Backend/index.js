@@ -6,6 +6,9 @@ export default (app, http) => {
   const cors = require("cors");
   app.use(cors());
 
+  // パスワードのハッシュ化用
+  const bcrypt = require("bcrypt");
+
   //JSONリクエストを解析してExpress.js側で扱えるデータにする
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -24,6 +27,24 @@ export default (app, http) => {
   //ルートディレクトリへのルーティング
   app.get("/", (req, res) => {
     res.send("<h1>This Page is DBServer!</h1>");
+  });
+
+  // Authenticate
+  app.post("/login", async (req, res, next) => {
+    const saltRounds = 10;
+    const hash_correct = await bcrypt.hash("鈴木" + "suzuki", saltRounds);
+    const match = await bcrypt.compare(
+      req.body.name + req.body.password,
+      hash_correct
+    );
+
+    if (match) {
+      console.log("ログイン成功");
+      res.sendStatus(200);
+      return;
+    }
+    console.log("ログイン失敗");
+    res.sendStatus(403);
   });
 
   //ルーティングによって行うCRUD処理を切り替えている
@@ -110,7 +131,7 @@ export default (app, http) => {
 
     //DBに存在しないIDでリクエストが来たら処理を中断する
     //findByPk : find By Primary Key
-    (async function () {
+    (async function() {
       await models.user
         .findByPk(accountData.id)
         //Promise Resolve
@@ -131,8 +152,8 @@ export default (app, http) => {
             console.error("find By Primary Key Promise Failed by: " + failed);
           }
         );
-    }())
-  })
+    })();
+  });
 
   //レコード更新(UPDATE)を行うルーティング処理
   app.post("/UpdateRecode", (req, res, next) => {
@@ -145,7 +166,6 @@ export default (app, http) => {
 
     //DB更新（即時関数)
     (async function UpdateRecode() {
-
       //SQL文： UPDATE users SET arg1 WHERE accountData.id
       await models.user
         .update(
@@ -180,5 +200,4 @@ export default (app, http) => {
         });
     })();
   });
-
 };
