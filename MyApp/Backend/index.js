@@ -20,10 +20,6 @@ export default (app, http) => {
     res.send(err);
   });
 
-  //CRUD処理に必要なライブラリのインポート
-  const sqlite3 = require("sqlite3").verbose();
-  const { Sequelize } = require("sequelize");
-
   //ルートディレクトリへのルーティング
   app.get("/", (req, res) => {
     res.send("<h1>This Page is DBServer!</h1>");
@@ -32,7 +28,11 @@ export default (app, http) => {
   // Authenticate
   app.post("/login", async (req, res, next) => {
     const saltRounds = 10;
+
+    // この部分、後でSequelizeで保存されたハッシュ値を取得する処理に書き換える
     const hash_correct = await bcrypt.hash("鈴木" + "suzuki", saltRounds);
+
+    // ハッシュ値の合否判定
     const match = await bcrypt.compare(
       req.body.name + req.body.password,
       hash_correct

@@ -1,9 +1,9 @@
 /**
  * AxiosによるHTTP通信を行う
  * @param {string} destinationURL - 送信先のURL
- * @param {string} submitMethod - 通信方法
- * @param {string} submitData - 通信データ
- * @return {Object} - response.dataのPromise
+ * @param {("PUT"|"GET")} submitMethod - 通信方法
+ * @param {Object} submitData - 通信データ
+ * @return {Object} - Promise
  */
 export default async function(destinationURL, submitMethod, submitData) {
   console.log("axios_http_communication called!");
@@ -46,9 +46,9 @@ export default async function(destinationURL, submitMethod, submitData) {
           console.debug("statusCode " + response.status);
           console.debug("body: " + response.data);
           return response.data;
-          //通信失敗時
         })
         .catch(err => {
+          //通信失敗時
           console.log(destinationURL + "へのデータ送信に失敗しました");
           console.error("err:" + err);
         });
