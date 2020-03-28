@@ -33,6 +33,7 @@ export default (app, http) => {
     const hash_correct = await bcrypt.hash("鈴木" + "suzuki", saltRounds);
 
     // ハッシュ値の合否判定
+    //hash_correct：ハッシュ化した入力された名前＋パスワード
     const match = await bcrypt.compare(
       req.body.name + req.body.password,
       hash_correct
@@ -52,7 +53,7 @@ export default (app, http) => {
   app.post("/RecordInsert", (req, res) => {
     //モデルのインポート、同時にDBも読み込んでいる
     //modelsディレクトリのindex.jsも見てそこ経由でconfig.jsonでDB情報も取得している
-    const models = require("./db/models/");
+    const models = require("./models/");
 
     //登録データ（obj）を取得する
     console.debug(req.body); //e.g. { office: 'Osaka', sex: 'male', name: 'Suzuki' }
@@ -92,7 +93,7 @@ export default (app, http) => {
   //レコード参照(READ)を行うルーティング処理
   app.get("/ReferenceTable", (req, res) => {
     //モデルの読み込み
-    const models = require("./db/models/");
+    const models = require("./models/");
 
     //DB参照（即時関数）
     (async function ReferenceTable() {
@@ -123,7 +124,7 @@ export default (app, http) => {
 
   //入力フォームのIDが有効かチェックするルーティング処理
   app.post("/UpdateRecode", (req, res, next) => {
-    const models = require("./db/models/");
+    const models = require("./models/");
 
     //登録データ（obj）を取得する
     console.debug(req.body); //e.g. { id: 3 'Osaka', sex: 'male', name: 'Suzuki' }
@@ -158,7 +159,7 @@ export default (app, http) => {
   //レコード更新(UPDATE)を行うルーティング処理
   app.post("/UpdateRecode", (req, res, next) => {
     //モデルの読み込み
-    const models = require("./db/models/");
+    const models = require("./models/");
 
     //登録データ（obj）を取得する
     console.debug(req.body); //e.g. { id: 3 'Osaka', sex: 'male', name: 'Suzuki' }
