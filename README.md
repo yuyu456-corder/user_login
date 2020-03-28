@@ -54,6 +54,10 @@
     - CRUD処理実装中のため、この機能はマージしていない
 - アカウント更新時の確認ダイアログのキャンセルを押しても、更新作業がされてしまう。
 
+## 問題点
+- sequelize-cliで作成されたconfig.jsonのstorageはDBへのパスが設定されているが、APIサーバが実行中はMyApp/（npm start）からの相対パスでないと接続できず、  
+CLIでsequelize-cliを用いてMigration等を行うときはコマンドを実行するカレンとディレクトリからの相対パスでないとDBと接続できない
+
 ## 開発環境
  - VSCode/Git
  - JavaScript

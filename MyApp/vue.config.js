@@ -2,7 +2,7 @@ module.exports = {
   pluginOptions: {
     express: {
       shouldServeApp: true,
-      serverDir: 'Backend'
+      serverDir: 'Backend/'
     }
   },
   devServer: {
