@@ -95,6 +95,7 @@ div.backend {
 
 #memberList {
   border-collapse: collapse;
+  margin: 0 auto;
 }
 
 table,
