@@ -142,7 +142,7 @@ export default (app, http) => {
   });
 
   //入力フォームのIDが有効かチェックするルーティング処理
-  app.post("/UpdateRecode", (req, res, next) => {
+  app.post("/UpdateRecord", (req, res, next) => {
     const models = require("./models/");
 
     //登録データ（obj）を取得する
@@ -161,7 +161,7 @@ export default (app, http) => {
             if (resolve === null) {
               return next(new Error("Request Id is Invalid"));
             } else {
-              //入力IDに問題が無ければ引き続き同じルーティング処理（/UpdateRecode）へ
+              //入力IDに問題が無ければ引き続き同じルーティング処理（/UpdateRecord）へ
               console.log("Request Id is Valid");
               next();
             }
@@ -176,7 +176,7 @@ export default (app, http) => {
   });
 
   //レコード更新(UPDATE)を行うルーティング処理
-  app.post("/UpdateRecode", (req, res, next) => {
+  app.post("/UpdateRecord", (req, res, next) => {
     //モデルの読み込み
     const models = require("./models/");
 
@@ -185,7 +185,7 @@ export default (app, http) => {
     let accountData = req.body; //e.g. accountData.name > Suzuki
 
     //DB更新（即時関数)
-    (async function UpdateRecode() {
+    (async function UpdateRecord() {
       //SQL文： UPDATE users SET arg1 WHERE accountData.id
       await models.user
         .update(
