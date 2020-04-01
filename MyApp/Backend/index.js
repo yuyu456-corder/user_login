@@ -221,4 +221,13 @@ export default (app, http) => {
         });
     })();
   });
+
+  app.post("/deleteRecord/:userId", async (req, res, next) => {
+    const models = require("./models/");
+    try {
+      await models.user.destroy({ where: { "id": req.params.userId } });
+    } catch (e) {
+      console.log("エラー：", e);
+    }
+  });
 };

@@ -24,7 +24,7 @@
         <td>{{ member.sex }}</td>
         <td>{{ member.office }}</td>
         <td>
-          <button @click="doRemove(index)">アカウント削除</button>
+          <button @click="removeMember(member.id)">削除</button>
         </td>
       </tr>
     </table>
@@ -61,6 +61,10 @@ export default {
       if (confirm("ローカルストレージを本当に空にしてもよろしいですか？")) {
         localStorage.clear();
       }
+    },
+    removeMember: function(id) {
+      const axios = require("axios");
+      axios.post(this.DBFileServerPort + "/deleteRecord/" + id);
     }
     //LocalStorage(またはDB)にアカウント情報全体を保存するメソッド（モジュール化）
     //アカウント削除を行うメソッド（モジュール化）
