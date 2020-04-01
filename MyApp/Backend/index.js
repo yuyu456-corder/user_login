@@ -8,6 +8,7 @@ export default (app, http) => {
 
   // パスワードのハッシュ化用
   const bcrypt = require("bcrypt");
+  const saltRounds = 10;
 
   //JSONリクエストを解析してExpress.js側で扱えるデータにする
   app.use(express.json());
@@ -20,6 +21,16 @@ export default (app, http) => {
     res.send(err);
   });
 
+  // request.bodyの値からハッシュ値を計算
+  const getHash = reqBody => {
+    return bcrypt.hash(reqBody.name + reqBody.password, saltRounds);
+  };
+
+  /**
+   * 以下routing
+   * 可読性のため、あとで別ファイルとして独立させるべき
+   */
+
   //ルートディレクトリへのルーティング
   app.get("/", (req, res) => {
     res.send("<h1>This Page is DBServer!</h1>");
@@ -27,22 +38,29 @@ export default (app, http) => {
 
   // Authenticate
   app.post("/login", async (req, res, next) => {
-    const saltRounds = 10;
+    const models = require("./models/");
 
-    // この部分、後でSequelizeで保存されたハッシュ値を取得する処理に書き換える
-    const hash_correct = await bcrypt.hash("鈴木" + "suzuki", saltRounds);
+    // DBから該当するユーザーのデータを引っ張る
+    const users = await models.user.findAll({ where: { name: req.body.name } });
 
-    // ハッシュ値の合否判定
-    //hash_correct：ハッシュ化した入力された名前＋パスワード
-    const match = await bcrypt.compare(
-      req.body.name + req.body.password,
-      hash_correct
-    );
-
-    if (match) {
-      console.log("ログイン成功");
-      res.sendStatus(200);
+    if (users.length == 0) {
+      console.log("存在しないユーザーでのログイン試行");
+      res.status(404).send("そのようなユーザーは登録されていません");
       return;
+    }
+
+    // 同名のユーザーが複数いる可能性を考慮し、forでループ
+    for (let user of users) {
+      const match = await bcrypt.compare(
+        req.body.name + req.body.password,
+        user.password
+      );
+
+      if (match) {
+        console.log("ログイン成功");
+        res.sendStatus(200);
+        return;
+      }
     }
     console.log("ログイン失敗");
     res.sendStatus(403);
@@ -69,7 +87,7 @@ export default (app, http) => {
           name: accountData.name,
           sex: accountData.sex,
           office: accountData.office,
-          password: accountData.password,
+          password: await getHash(accountData),
           createdAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" }),
           updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
         })
@@ -176,7 +194,7 @@ export default (app, http) => {
             name: accountData.name,
             sex: accountData.sex,
             office: accountData.office,
-            password: accountData.password,
+            password: await getHash(accountData),
             updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
           },
           {
