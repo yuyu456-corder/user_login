@@ -65,22 +65,25 @@ export default {
     removeMember: function(id) {
       const axios = require("axios");
       axios.post(this.DBFileServerPort + "/deleteRecord/" + id);
-    }
+      this.loadMemberList();
+    },
     //LocalStorage(またはDB)にアカウント情報全体を保存するメソッド（モジュール化）
     //アカウント削除を行うメソッド（モジュール化）
     //アカウント検索＋着色メソッド（モジュール化）
+    loadMemberList: async function() {
+      this.getUserData = await axiosHttpCommunication(
+        this.DBFileServerPort + "/ReferenceTable",
+        "GET"
+      );
+      console.debug("getUserDataの内容:", this.getUserData);
+      //連想配列にして、vue側のdataオプションで捕捉する
+      this.members = await JSON.parse(this.getUserData);
+    }
   },
   //ページリロード時にアカウントデータをDBから取得するメソッド
-  created: async function() {
+  created: function() {
     console.log("Vue instance created!");
-    //await以降の関数はpromiseを返さないと同期処理は機能しない
-    this.getUserData = await axiosHttpCommunication(
-      this.DBFileServerPort + "/ReferenceTable",
-      "GET"
-    );
-    console.debug("getUserDataの内容:", this.getUserData);
-    //連想配列にして、vue側のdataオプションで捕捉する
-    this.members = JSON.parse(this.getUserData);
+    this.loadMemberList();
   }
 };
 </script>
