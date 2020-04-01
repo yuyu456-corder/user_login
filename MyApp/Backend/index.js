@@ -120,7 +120,7 @@ export default (app, http) => {
 
       //usersテーブルから全て取得している
       await models.user
-        .findAll()
+        .findAll({ attributes: { exclude: ["password"] } })
         .then(
           //Promise Resolve
           resolve => {
