@@ -10,16 +10,24 @@
     <!-- sexFilterはmember情報にshownを追加してv-shownで行っていた -->
 
     <h2>アカウント登録者一覧</h2>
-    <ul id="memberList">
-      <li
-        v-for="(member,index) in members"
-        v-bind:key="member.id"
-      >
-        id: {{ member.id }}, Name: {{ member.name }}, Sex: {{ member.sex }},
-        Office: {{ member.office }}
-      </li>
-      <!-- <button @click="doRemove(index)">アカウント削除</button> -->
-    </ul>
+    <table id="memberList">
+      <tr>
+        <th>ID</th>
+        <th>名前</th>
+        <th>性別</th>
+        <th>事業所</th>
+        <th>削除</th>
+      </tr>
+      <tr v-for="member in members" v-bind:key="member.id">
+        <td>{{ member.id }}</td>
+        <td>{{ member.name }}</td>
+        <td>{{ member.sex }}</td>
+        <td>{{ member.office }}</td>
+        <td>
+          <button @click="doRemove(index)">アカウント削除</button>
+        </td>
+      </tr>
+    </table>
 
     <button @click="doClear">LocalStorage初期化</button>
   </div>
@@ -76,5 +84,15 @@ export default {
 <style scoped>
 div.backend {
   background-color: #afeeee;
+}
+
+#memberList {
+  border-collapse: collapse;
+}
+
+table,
+th,
+td {
+  border: solid 1px black;
 }
 </style>
