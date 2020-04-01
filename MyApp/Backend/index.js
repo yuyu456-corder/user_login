@@ -69,6 +69,7 @@ export default (app, http) => {
           name: accountData.name,
           sex: accountData.sex,
           office: accountData.office,
+          password: accountData.password,
           createdAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" }),
           updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
         })
@@ -175,6 +176,7 @@ export default (app, http) => {
             name: accountData.name,
             sex: accountData.sex,
             office: accountData.office,
+            password: accountData.password,
             updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
           },
           {
