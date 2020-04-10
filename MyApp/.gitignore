@@ -5,6 +5,12 @@ node_modules
 # DB本体はコミットしてるので、2度目以降DB内に個人情報等が入る等のインシデントを防ぐ
 *.sqlite
 
+# 鍵発行に使用するディレクトリは除く
+.ssh
+
+# 公開したくない環境変数
+.env
+
 # local env files
 .env.local
 .env.*.local
