@@ -36,6 +36,37 @@ export default (app, http) => {
     res.send("<h1>This Page is DBServer!</h1>");
   });
 
+  // トークンによるユーザ認証（テスト用）
+  app.post("/testTokenAuthenticate", async (req, res, next) => {
+    console.log("testTokenAuthenticate called!")
+    const models = require("./models/");
+    //JWTトークンを作成するライブラリ
+    const jwt = require("jsonwebtoken");
+    //秘密鍵の取得
+    require('dotenv').config();
+    //秘密鍵の取得。改行コードのエスケープを解除し、バイナリデータ化する
+    const privateKey = Buffer.from(process.env.PRIVATE_KEY.replace(/\\n/g, '\n'));
+
+    // DBからIDを取得
+    await models.user.findAll({ where: { name: req.body.name } }).then(
+      resolve => {
+        // 既にアカウント作成済みのユーザからリクエストが送られたらIDでトークンを発行する
+        // APIサーバと認可サーバが同じのため、HS256（共通鍵）で暗号化している
+        // テストコードのためIDを固定値にして発行している
+        jwt.sign({ id: 1 }, privateKey, { algorithm: "HS256" },
+          (err, token) => {
+            console.log("generated Token: " + token);
+          }
+        );
+      },
+      failed => {
+        // アカウント登録を行っていないユーザの場合
+        console.log(req.body.name + "is No Account");
+        res.sendStatus(404).send("そのようなユーザーは登録されていません");
+      }
+    );
+  })
+
   // Authenticate
   app.post("/login", async (req, res, next) => {
     const models = require("./models/");
@@ -67,7 +98,7 @@ export default (app, http) => {
   });
 
   //ルーティングによって行うCRUD処理を切り替えている
-  //レコード挿入(INSERT)を行うルーティング処理
+  //レコード挿入(INSERT)を行う
   app.post("/RecordInsert", (req, res) => {
     //モデルのインポート、同時にDBも読み込んでいる
     //modelsディレクトリのindex.jsも見てそこ経由でconfig.jsonでDB情報も取得している
@@ -109,7 +140,7 @@ export default (app, http) => {
     })();
   });
 
-  //レコード参照(READ)を行うルーティング処理
+  //レコード参照(READ)を行う
   app.get("/ReferenceTable", (req, res) => {
     //モデルの読み込み
     const models = require("./models/");
@@ -141,7 +172,7 @@ export default (app, http) => {
     })();
   });
 
-  //入力フォームのIDが有効かチェックするルーティング処理
+  //入力フォームのIDが有効かチェックする
   app.post("/UpdateRecord", (req, res, next) => {
     const models = require("./models/");
 
@@ -151,7 +182,7 @@ export default (app, http) => {
 
     //DBに存在しないIDでリクエストが来たら処理を中断する
     //findByPk : find By Primary Key
-    (async function() {
+    (async function () {
       await models.user
         .findByPk(accountData.id)
         //Promise Resolve
@@ -175,7 +206,7 @@ export default (app, http) => {
     })();
   });
 
-  //レコード更新(UPDATE)を行うルーティング処理
+  //レコード更新(UPDATE)を行う
   app.post("/UpdateRecord", (req, res, next) => {
     //モデルの読み込み
     const models = require("./models/");
@@ -222,6 +253,7 @@ export default (app, http) => {
     })();
   });
 
+  //レコード削除(DELETE)を行う
   app.post("/deleteRecord/:userId", async (req, res, next) => {
     const models = require("./models/");
     try {

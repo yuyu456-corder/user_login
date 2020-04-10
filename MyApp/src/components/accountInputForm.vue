@@ -6,7 +6,12 @@
     <!-- ID入力欄
     表示するのはユーザー情報変更時のみ-->
     <span v-if="formType === 'update'">
-      <input type="text" v-model="accountData.id" name="user_id" placeholder="ユーザーID" />
+      <input
+        type="text"
+        v-model="accountData.id"
+        name="user_id"
+        placeholder="ユーザーID"
+      />
     </span>
     <br />
 
@@ -31,12 +36,22 @@
     />
     <br />
 
-    <p v-if="loginFailed" style="color: red">ログインに失敗しました。</p>
+    <p v-if="loginFailed" style="color: red;">ログインに失敗しました。</p>
 
     <!-- 情報更新時か新規作成時にのみ選択する項目 -->
     <div v-if="formType === 'register' || formType === 'update'">
-      <input type="radio" v-model="accountData.sex" name="sex" value="male" />男性
-      <input type="radio" v-model="accountData.sex" name="sex" value="female" />女性
+      <input
+        type="radio"
+        v-model="accountData.sex"
+        name="sex"
+        value="male"
+      />男性
+      <input
+        type="radio"
+        v-model="accountData.sex"
+        name="sex"
+        value="female"
+      />女性
       <br />
 
       <select name="office_place" v-model="accountData.office">
@@ -51,21 +66,21 @@
 
     <!-- どのフォームかによって、送信ボタンのテキストを変える -->
     <input
-      v-if="formType==='register'"
+      v-if="formType === 'register'"
       type="button"
       value="登録"
       id="registerButton"
       @click="accountRegister"
     />
     <input
-      v-else-if="formType==='update'"
+      v-else-if="formType === 'update'"
       type="button"
       value="更新"
       id="updateButton"
       @click="accountUpdate"
     />
     <input
-      v-else-if="formType==='login'"
+      v-else-if="formType === 'login'"
       type="button"
       value="ログイン"
       id="loginButton"
@@ -82,7 +97,7 @@ export default {
   name: "accountInputForm",
   props: {
     msg: String,
-    formType: String // either of "update", "register", "login"
+    formType: String, // either of "update", "register", "login"
   },
   data: function() {
     return {
@@ -98,7 +113,7 @@ export default {
         office: "",
         sex: "",
         name: "",
-        password: ""
+        password: "",
       },
       //アクセスカウンタ（初期値0）
       accessCount: 0,
@@ -108,7 +123,7 @@ export default {
       responseData: "",
 
       // Boolean to show if the login attempt is successful
-      loginFailed: false
+      loginFailed: false,
     };
   },
   computed: {
@@ -121,7 +136,7 @@ export default {
       if (this.formType === "update") return "新しいパスワード";
       if (this.formType === "register") return "新規パスワード";
       if (this.formType === "login") return "パスワード";
-    }
+    },
   },
   methods: {
     // 登録ボタンが押された場合
@@ -141,6 +156,12 @@ export default {
       // ユーザ名・パスワードが不正なら403を返すようにBackendはなっている
       // レスポンスとして403が返ってくるとVueはエラーを投げるようなので、それを捕捉する
       try {
+        //トークンによるユーザ認証も行う。このルーティングが動作するなら/loginに組み込む
+        //トークン発行＞アクセストークンとしてクライアントに送信するのは、ログイン処理が終わってから行う
+        await axios.post(
+          this.DBFileServerPort + "/testTokenAuthenticate",
+          this.accountData
+        );
         await axios.post(this.DBFileServerPort + "/login", this.accountData);
       } catch (err) {
         this.loginFailed = true;
@@ -163,7 +184,7 @@ export default {
       }
 
       //DBのアカウント情報を更新する
-      this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecord");
+      this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecode");
     },
     /**
      * 入力フォームの例外処理のメソッド
@@ -221,8 +242,8 @@ export default {
       console.debug("called axiosHttpCommunication!");
       //POST通信でDBへアカウント情報（レコード）を追加する
       axiosHttpCommunication(DestinationURL, "POST", this.accountData);
-    }
-  }
+    },
+  },
 };
 </script>
 
