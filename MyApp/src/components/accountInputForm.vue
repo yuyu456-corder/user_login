@@ -184,7 +184,7 @@ export default {
       }
 
       //DBのアカウント情報を更新する
-      this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecode");
+      this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecord");
     },
     /**
      * 入力フォームの例外処理のメソッド
