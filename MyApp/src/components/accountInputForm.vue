@@ -121,7 +121,6 @@ export default {
       DBFileServerPort: "http://localhost:8000",
       //サーバからのレスポンスデータを受け取る変数
       responseData: "",
-
       // Boolean to show if the login attempt is successful
       loginFailed: false,
     };
@@ -140,12 +139,21 @@ export default {
   },
   methods: {
     // 登録ボタンが押された場合
-    accountRegister: function() {
+    accountRegister: async function() {
+      const axios = require("axios");
       // 入力フォームの値の検証処理を行う
       if (!this.validateForms()) return;
       //ルーティングによってDB処理内容を変えている
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
-      this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
+      try {
+        await axios.post(
+          this.DBFileServerPort + "/RecordInsert",
+          this.accountData
+        );
+        alert("登録が完了しました");
+      } catch (err) {
+        alert("登録が失敗しました: " + err);
+      }
     },
     // ログインボタンが押された場合
     accountLogin: async function() {
@@ -156,12 +164,7 @@ export default {
       // ユーザ名・パスワードが不正なら403を返すようにBackendはなっている
       // レスポンスとして403が返ってくるとVueはエラーを投げるようなので、それを捕捉する
       try {
-        //トークンによるユーザ認証も行う。このルーティングが動作するなら/loginに組み込む
         //トークン発行＞アクセストークンとしてクライアントに送信するのは、ログイン処理が終わってから行う
-        await axios.post(
-          this.DBFileServerPort + "/testTokenAuthenticate",
-          this.accountData
-        );
         await axios.post(this.DBFileServerPort + "/login", this.accountData);
       } catch (err) {
         this.loginFailed = true;
@@ -172,6 +175,7 @@ export default {
     },
     //更新ボタンが押された場合
     accountUpdate: async function() {
+      const axios = require("axios");
       if (!this.validateForms()) return;
 
       //ダイアログでキャンセル押下時は更新作業を行わない
@@ -183,8 +187,17 @@ export default {
         return;
       }
 
-      //DBのアカウント情報を更新する
-      this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecord");
+      try {
+        //DBのアカウント情報を更新する
+        await axios.post(
+          this.DBFileServerPort + "/UpdateRecord",
+          this.accountData
+        );
+        alert("登録処理が成功しました");
+      } catch (err) {
+        alert("登録処理が失敗しました: " + err);
+        return;
+      }
     },
     /**
      * 入力フォームの例外処理のメソッド

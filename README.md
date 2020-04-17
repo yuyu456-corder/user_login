@@ -29,7 +29,7 @@
   - 対応するアカウントの削除ボタンで可能
 - アクセストークンの発行
   - ログインを行ったユーザに対してトークンを発行する
-  - 現状はテストとして対応したユーザの ID をもとにトークンをターミナルに出力するだけ
+  - 現状はテストとしてjsonwebtokenの第一引数のユーザを固定値にし、発行されたトークンを出力しているだけ
 - ローカルストレージによるアクセスカウンタ
 
 ## あったらいい機能
@@ -42,7 +42,7 @@
 
 1. `cd MyApp/`
 1. `npm install`
-1. `npm start`<br>
+1. `npm start`
    　- localhost:8080 がフロントエンド側、localhost:8000 がバックエンド側と仮定して開発中
 1. `localhost:8080`にアクセス
 
@@ -60,6 +60,7 @@
 
 - sequelize-cli で作成された config.json の storage は DB へのパスが設定されているが、API サーバが実行中は MyApp/（npm start）からの相対パスでないと接続できず、  
   CLI で sequelize-cli を用いて Migration 等を行うときはコマンドを実行するカレンとディレクトリからの相対パスでないと DB と接続できない
+- モジュール化したaxios_http_communication.js経由でサーバとのHTTP通信を行うと、レスポンス結果がVue側で検知できないため、現在使用していない
 
 ## 開発環境
 
@@ -73,4 +74,5 @@
   - sequelize-cli (npm Library)
   - dotenv (npm Library)
   - jsonwebtoken (npm Library)
+  - cypress (npm Library)
 - SQLite
