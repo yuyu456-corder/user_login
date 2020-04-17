@@ -16,9 +16,11 @@ export default (app, http) => {
 
   //エラーハンドリング用のミドルウェア(全てのミドルウェアの最後で呼び出す)
   //next(new Error)で各ルーティング経由で呼ばれる
+  //現状は各ルーティング処理で行っているがここで一元管理したい
   app.use(function errorHandler(err, req, res, next) {
-    console.log(err);
-    res.send(err);
+    console.error(err);
+    res.status(403).send(err);
+    return;
   });
 
   // request.bodyの値からハッシュ値を計算
@@ -36,39 +38,10 @@ export default (app, http) => {
     res.send("<h1>This Page is DBServer!</h1>");
   });
 
-  // トークンによるユーザ認証（テスト用）
-  app.post("/testTokenAuthenticate", async (req, res, next) => {
-    console.log("testTokenAuthenticate called!")
-    const models = require("./models/");
-    //JWTトークンを作成するライブラリ
-    const jwt = require("jsonwebtoken");
-    //秘密鍵の取得
-    require('dotenv').config();
-    //秘密鍵の取得。改行コードのエスケープを解除し、バイナリデータ化する
-    const privateKey = Buffer.from(process.env.PRIVATE_KEY.replace(/\\n/g, '\n'));
-
-    // DBからIDを取得
-    await models.user.findAll({ where: { name: req.body.name } }).then(
-      resolve => {
-        // 既にアカウント作成済みのユーザからリクエストが送られたらIDでトークンを発行する
-        // APIサーバと認可サーバが同じのため、HS256（共通鍵）で暗号化している
-        // テストコードのためIDを固定値にして発行している
-        jwt.sign({ id: 1 }, privateKey, { algorithm: "HS256" },
-          (err, token) => {
-            console.log("generated Token: " + token);
-          }
-        );
-      },
-      failed => {
-        // アカウント登録を行っていないユーザの場合
-        console.log(req.body.name + "is No Account");
-        res.sendStatus(404).send("そのようなユーザーは登録されていません");
-      }
-    );
-  })
-
   // Authenticate
   app.post("/login", async (req, res, next) => {
+    //JWTトークンを作成するライブラリ
+    const jwt = require("jsonwebtoken");
     const models = require("./models/");
 
     // DBから該当するユーザーのデータを引っ張る
@@ -76,7 +49,7 @@ export default (app, http) => {
 
     if (users.length == 0) {
       console.log("存在しないユーザーでのログイン試行");
-      res.status(404).send("そのようなユーザーは登録されていません");
+      res.status(403).send("そのようなユーザーは登録されていません");
       return;
     }
 
@@ -87,9 +60,23 @@ export default (app, http) => {
         user.password
       );
 
+      //リクエストから送られたユーザ名とパスワードが一致すればログイン成功とする
       if (match) {
         console.log("ログイン成功");
-        res.sendStatus(200);
+        //アクセストークンをログインが成功したユーザへ発行する
+        //秘密鍵の取得
+        require('dotenv').config();
+        //秘密鍵の取得。改行コードのエスケープを解除し、バイナリデータ化する
+        const privateKey = Buffer.from(process.env.PRIVATE_KEY.replace(/\\n/g, '\n'));
+        // 既にアカウント作成済みのユーザからリクエストが送られたらユーザ情報でトークンを発行する
+        // APIサーバと認可サーバが同じのため、HS256（共通鍵）で暗号化している
+        jwt.sign({ id: 1 }, privateKey, { algorithm: "HS256" },
+          (err, token) => {
+            console.log("generated Token: " + token);
+            res.status(200).send(token);
+            return;
+          }
+        );
         return;
       }
     }
@@ -123,20 +110,19 @@ export default (app, http) => {
           updatedAt: new Date().toLocaleString({ timeZone: "Asia/Tokyo" })
         })
         .then(
-          //Promise Resolve
+          //Promise Resolve(登録成功)
           resolve => {
             console.debug("Hello! " + accountData.name + " Inserted!");
-            return null;
+            res.status(200).end();
+            return;
           },
-          //Promise Failed
+          //Promise Failed（DB接続失敗等による登録失敗）
           failed => {
             console.error("Record Inserting Promise Failed by:" + failed);
-            return null;
+            res.status(500).end();
+            return;
           }
-        )
-        .finally(() => {
-          res.send("Record Inserting Process Done!");
-        });
+        );
     })();
   });
 
@@ -153,22 +139,20 @@ export default (app, http) => {
       await models.user
         .findAll({ attributes: { exclude: ["password"] } })
         .then(
-          //Promise Resolve
+          //Promise Resolve(参照成功)
           resolve => {
             let findTable = JSON.stringify(resolve);
             //JSONファイルとしてデータをFrontendに返している
             res.json(findTable);
-            return null;
+            return;
           },
-          //Promise Failed
+          //Promise Failed（参照失敗）
           failed => {
             console.error("Table Referencing Promise Failed by:" + failed);
-            return null;
+            res.status(403).end();
+            return;
           }
         )
-        .finally(() => {
-          console.log("Table Referencing Process Done!");
-        });
     })();
   });
 
@@ -188,19 +172,17 @@ export default (app, http) => {
         //Promise Resolve
         .then(
           resolve => {
-            //リクエストIDがDBに存在しなかったらエラーハンドリング用のミドルウェアにルーティングしてこのルートでの作業は中断する
+            //IDが存在すれば引き続きアカウント更新作業へ
             if (resolve === null) {
-              return next(new Error("Request Id is Invalid"));
-            } else {
-              //入力IDに問題が無ければ引き続き同じルーティング処理（/UpdateRecord）へ
-              console.log("Request Id is Valid");
-              next();
+              res.status(403).send("IDが存在しません");
             }
-            return null;
+            next();
+            return;
           },
-          //Promise Failed
+          //Promise Failed（DBと接続できない等、サーバ側のエラー）
           failed => {
-            console.error("find By Primary Key Promise Failed by: " + failed);
+            res.status(500).send(failed);
+            return;
           }
         );
     })();
@@ -208,6 +190,7 @@ export default (app, http) => {
 
   //レコード更新(UPDATE)を行う
   app.post("/UpdateRecord", (req, res, next) => {
+    console.log("UpdateRecord called")
     //モデルの読み込み
     const models = require("./models/");
 
@@ -236,20 +219,17 @@ export default (app, http) => {
           }
         )
         .then(
-          //Promise Resolve
+          //Promise Resolve(更新成功)
           resolve => {
             console.debug("Hello! " + accountData.name + " Updated!");
-            res.send("アカウント情報の更新に成功しました");
+            res.status(200).end();
           },
-          //Promise Failed
+          //Promise Failed（更新失敗）
           failed => {
             console.error("Record Updating Promise Failed by:" + failed);
-            res.send("アカウント情報の更新に失敗しました");
+            res.status(403).end();
           }
-        )
-        .finally(() => {
-          console.log("Record Updating Process Done!");
-        });
+        );
     })();
   });
 
