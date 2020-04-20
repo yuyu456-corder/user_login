@@ -14,6 +14,10 @@ export default (app, http) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  //Cookieを取り扱うミドルウェア
+  const cookieParser = require("cookie-parser");
+  app.use(cookieParser("accessToken"));
+
   //エラーハンドリング用のミドルウェア(全てのミドルウェアの最後で呼び出す)
   //next(new Error)で各ルーティング経由で呼ばれる
   //現状は各ルーティング処理で行っているがここで一元管理したい
@@ -65,15 +69,27 @@ export default (app, http) => {
         console.log("ログイン成功");
         //アクセストークンをログインが成功したユーザへ発行する
         //秘密鍵の取得
-        require('dotenv').config();
+        require("dotenv").config();
         //秘密鍵の取得。改行コードのエスケープを解除し、バイナリデータ化する
-        const privateKey = Buffer.from(process.env.PRIVATE_KEY.replace(/\\n/g, '\n'));
+        //秘密鍵が存在しない場合はreplaceメソッドで動かなくなるのでそれを回避する
+        let privateKey;
+        if (process.env.PRIVATE_KEY) {
+          privateKey = Buffer.from(process.env.PRIVATE_KEY.replace(/\\n/g, '\n'));
+        }
         // 既にアカウント作成済みのユーザからリクエストが送られたらユーザ情報でトークンを発行する
         // APIサーバと認可サーバが同じのため、HS256（共通鍵）で暗号化している
-        jwt.sign({ id: 1 }, privateKey, { algorithm: "HS256" },
+        jwt.sign({ id: user.id }, privateKey, { algorithm: "HS256" },
           (err, token) => {
+            //トークンの発行に失敗した場合でもログイン処理を中断しないようにする
+            if (err) {
+              console.error("generating Token Failed: " + err);
+              res.sendStatus(200);
+              return;
+            };
+            //トークンの発行に成功した場合、クライアントのブラウザ(Cookie)に保存させる
             console.log("generated Token: " + token);
-            res.status(200).send(token);
+            res.cookie("accessToken", token);
+            res.sendStatus(200);
             return;
           }
         );
