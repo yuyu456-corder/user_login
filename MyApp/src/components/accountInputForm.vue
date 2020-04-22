@@ -6,7 +6,12 @@
     <!-- ID入力欄
     表示するのはユーザー情報変更時のみ-->
     <span v-if="formType === 'update'">
-      <input type="text" v-model="accountData.id" name="user_id" placeholder="ユーザーID" />
+      <input
+        type="text"
+        v-model="accountData.id"
+        name="user_id"
+        placeholder="ユーザーID"
+      />
     </span>
     <br />
 
@@ -31,12 +36,22 @@
     />
     <br />
 
-    <p v-if="loginFailed" style="color: red">ログインに失敗しました。</p>
+    <p v-if="loginFailed" style="color: red;">ログインに失敗しました。</p>
 
     <!-- 情報更新時か新規作成時にのみ選択する項目 -->
     <div v-if="formType === 'register' || formType === 'update'">
-      <input type="radio" v-model="accountData.sex" name="sex" value="male" />男性
-      <input type="radio" v-model="accountData.sex" name="sex" value="female" />女性
+      <input
+        type="radio"
+        v-model="accountData.sex"
+        name="sex"
+        value="male"
+      />男性
+      <input
+        type="radio"
+        v-model="accountData.sex"
+        name="sex"
+        value="female"
+      />女性
       <br />
 
       <select name="office_place" v-model="accountData.office">
@@ -51,21 +66,21 @@
 
     <!-- どのフォームかによって、送信ボタンのテキストを変える -->
     <input
-      v-if="formType==='register'"
+      v-if="formType === 'register'"
       type="button"
       value="登録"
       id="registerButton"
       @click="accountRegister"
     />
     <input
-      v-else-if="formType==='update'"
+      v-else-if="formType === 'update'"
       type="button"
       value="更新"
       id="updateButton"
       @click="accountUpdate"
     />
     <input
-      v-else-if="formType==='login'"
+      v-else-if="formType === 'login'"
       type="button"
       value="ログイン"
       id="loginButton"
@@ -82,7 +97,7 @@ export default {
   name: "accountInputForm",
   props: {
     msg: String,
-    formType: String // either of "update", "register", "login"
+    formType: String, // either of "update", "register", "login"
   },
   data: function() {
     return {
@@ -98,7 +113,7 @@ export default {
         office: "",
         sex: "",
         name: "",
-        password: ""
+        password: "",
       },
       //アクセスカウンタ（初期値0）
       accessCount: 0,
@@ -106,9 +121,8 @@ export default {
       DBFileServerPort: "http://localhost:8000",
       //サーバからのレスポンスデータを受け取る変数
       responseData: "",
-
       // Boolean to show if the login attempt is successful
-      loginFailed: false
+      loginFailed: false,
     };
   },
   computed: {
@@ -121,16 +135,25 @@ export default {
       if (this.formType === "update") return "新しいパスワード";
       if (this.formType === "register") return "新規パスワード";
       if (this.formType === "login") return "パスワード";
-    }
+    },
   },
   methods: {
     // 登録ボタンが押された場合
-    accountRegister: function() {
+    accountRegister: async function() {
+      const axios = require("axios");
       // 入力フォームの値の検証処理を行う
       if (!this.validateForms()) return;
       //ルーティングによってDB処理内容を変えている
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
-      this.axiosHttpCommunication(this.DBFileServerPort + "/RecordInsert");
+      try {
+        await axios.post(
+          this.DBFileServerPort + "/RecordInsert",
+          this.accountData
+        );
+        alert("登録が完了しました");
+      } catch (err) {
+        alert("登録が失敗しました: " + err);
+      }
     },
     // ログインボタンが押された場合
     accountLogin: async function() {
@@ -141,6 +164,7 @@ export default {
       // ユーザ名・パスワードが不正なら403を返すようにBackendはなっている
       // レスポンスとして403が返ってくるとVueはエラーを投げるようなので、それを捕捉する
       try {
+        //トークン発行＞アクセストークンとしてクライアントに送信するのは、ログイン処理が終わってから行う
         await axios.post(this.DBFileServerPort + "/login", this.accountData);
       } catch (err) {
         this.loginFailed = true;
@@ -151,6 +175,7 @@ export default {
     },
     //更新ボタンが押された場合
     accountUpdate: async function() {
+      const axios = require("axios");
       if (!this.validateForms()) return;
 
       //ダイアログでキャンセル押下時は更新作業を行わない
@@ -162,8 +187,17 @@ export default {
         return;
       }
 
-      //DBのアカウント情報を更新する
-      this.axiosHttpCommunication(this.DBFileServerPort + "/UpdateRecord");
+      try {
+        //DBのアカウント情報を更新する
+        await axios.post(
+          this.DBFileServerPort + "/UpdateRecord",
+          this.accountData
+        );
+        alert("登録処理が成功しました");
+      } catch (err) {
+        alert("登録処理が失敗しました: " + err);
+        return;
+      }
     },
     /**
      * 入力フォームの例外処理のメソッド
@@ -221,8 +255,8 @@ export default {
       console.debug("called axiosHttpCommunication!");
       //POST通信でDBへアカウント情報（レコード）を追加する
       axiosHttpCommunication(DestinationURL, "POST", this.accountData);
-    }
-  }
+    },
+  },
 };
 </script>
 
