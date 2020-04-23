@@ -1,16 +1,10 @@
 const good_users = [
-  { name: "織田信長", password: "oda1234", sex: "male", office: "大阪事業所" },
+  { name: "伊達政宗", password: "aoba1234", sex: "male", office: "仙台事業所" },
   {
-    name: "北条政子",
-    password: "gokamakura1234",
+    name: "樋口一葉",
+    password: "midori777",
     sex: "female",
-    office: "仙台事業所",
-  },
-  {
-    name: "太田道灌",
-    password: "edo1234",
-    sex: "male",
-    office: "札幌事業所",
+    office: "東京事業所",
   },
 ];
 
@@ -20,7 +14,7 @@ describe("user_loginの正常ログイン機能をテストします！", functi
       cy.visit("/");
       cy.get('input[name="user_name"]').type(user.name);
       cy.get('input[name="password"]').type(user.password);
-      cy.get('input[value="male"]').check();
+      cy.get('input[name="sex"]').check(user.sex);
       cy.get('select[name="office_place"]').select(user.office);
       cy.get('input[id="registerButton"]').click();
 
@@ -50,7 +44,7 @@ describe("user_loginの正常ログイン機能をテストします！", functi
 
     it("ユーザーマスタでの存在確認: " + user.name, function() {
       cy.visit("/AdministratorPage");
-      cy.wait(500);
+      cy.wait(200);
       cy.get("tr")
         .eq(-1)
         .should("contain", user.name);
@@ -58,7 +52,7 @@ describe("user_loginの正常ログイン機能をテストします！", functi
 
     it("ユーザーマスタからの削除テスト: " + user.name, function() {
       cy.visit("/AdministratorPage");
-      cy.wait(500);
+      cy.wait(200);
       cy.get("tr>td>button")
         .eq(-1)
         .click();
