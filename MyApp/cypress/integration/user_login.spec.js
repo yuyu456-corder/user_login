@@ -14,7 +14,7 @@ const good_users = [
   },
 ];
 
-describe("正常ログイン機能テスト", function() {
+describe("user_loginの正常ログイン機能をテストします！", function() {
   good_users.map((user) => {
     it("ユーザー新規登録試行: " + user.name, function() {
       cy.visit("/");
@@ -24,13 +24,13 @@ describe("正常ログイン機能テスト", function() {
       cy.get('select[name="office_place"]').select(user.office);
       cy.get('input[id="registerButton"]').click();
 
+      cy.wait(200);
+
       const stub = cy.stub();
       cy.on("window:alert", stub);
-      cy.get('input[id="registerButton"]')
-        .click()
-        .then(() => {
-          expect(stub.getCall(0)).to.be.calledWith("登録が完了しました");
-        });
+      cy.get('input[id="registerButton"]').then(() => {
+        expect(stub.getCall(0)).to.be.calledWith("登録が完了しました");
+      });
     });
 
     it("登録済ユーザーログイン試行: " + user.name, function() {
@@ -46,6 +46,22 @@ describe("正常ログイン機能テスト", function() {
         .then(() => {
           expect(stub.getCall(0)).to.be.calledWith("ログインに成功しました");
         });
+    });
+
+    it("ユーザーマスタでの存在確認: " + user.name, function() {
+      cy.visit("/AdministratorPage");
+      cy.wait(500);
+      cy.get("tr")
+        .eq(-1)
+        .should("contain", user.name);
+    });
+
+    it("ユーザーマスタからの削除テスト: " + user.name, function() {
+      cy.visit("/AdministratorPage");
+      cy.wait(500);
+      cy.get("tr>td>button")
+        .eq(-1)
+        .click();
     });
   });
 });
