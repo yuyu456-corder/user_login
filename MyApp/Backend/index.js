@@ -3,8 +3,9 @@ const app = express();
 
 export default (app, http) => {
   //全てのAPIのCORSを許可する
+  //クロスサイト間のCookieのセッションも許可する
   const cors = require("cors");
-  app.use(cors());
+  app.use(cors({ origin: true, credentials: true }));
 
   // パスワードのハッシュ化用
   const bcrypt = require("bcrypt");
@@ -16,7 +17,7 @@ export default (app, http) => {
 
   //Cookieを取り扱うミドルウェア
   const cookieParser = require("cookie-parser");
-  app.use(cookieParser("accessToken"));
+  app.use(cookieParser());
 
   //エラーハンドリング用のミドルウェア(全てのミドルウェアの最後で呼び出す)
   //next(new Error)で各ルーティング経由で呼ばれる
@@ -33,6 +34,24 @@ export default (app, http) => {
   };
 
   /**
+   * アクセストークンのデコードを行う
+   * @param {string} getAccessToken - クライアントから受け取った後アクセストークン
+   * @return {array} - デコードしたアクセストークン
+   */
+  // const decodeJwt = getAccessToken => {
+  //   const base64JwtUrls = getAccessToken(".");
+  //   //base64のデコードする前にエンコード対象外の文字列を置換する
+  //   const base64jwtTokens = base64JwtUrls.map(base64JwtUrl => {
+  //     return base64JwtUrl.replace(/-/g, "+").replace(/_/g, "/");
+  //   });
+  //   //base64のバイナリデータに変換する
+  //   const base64Buffer = base64jwtTokens.map(base64jwtToken => {
+  //     base64jwtToken = new Buffer(base64jwtToken, "base64")
+  //   });
+  //   return decodeAccessToken;
+  // };
+
+  /**
    * 以下routing
    * 可読性のため、あとで別ファイルとして独立させるべき
    */
@@ -42,7 +61,26 @@ export default (app, http) => {
     res.send("<h1>This Page is DBServer!</h1>");
   });
 
-  // Authenticate
+  // アクセストークンによる自動ログイン
+  // app.post("/loginAccessToken", (req, res) => {
+  //クライアントのリクエストにアクセストークンがあればログイン処理は成功させる
+  //   console.log("get cookie: " + req.cookies["accessToken"]);
+  //   if (req.cookies !== undefined) {
+  //     console.log("AccessToken detected!: " + req.cookies["accessToken"]);
+  //     //受け取ったトークンを復号し、正当性を確認
+  //     const decodeJwtResult = decodeJwt(getAccessToken);
+  //     console.debug(decodeJwtResult);
+  //     //正当性が確認されればログイン成功とする
+  //     res.sendStatus(200);
+  //     console.log("ログイン成功");
+  //     return;
+  //   };
+  //   //トークンが確認できなければ何もしない
+  //   res.sendStatus(200);
+  //   return;
+  // });
+
+  // アカウント情報入力によるログイン
   app.post("/login", async (req, res, next) => {
     //JWTトークンを作成するライブラリ
     const jwt = require("jsonwebtoken");
@@ -83,19 +121,19 @@ export default (app, http) => {
             //トークンの発行に失敗した場合でもログイン処理を中断しないようにする
             if (err) {
               console.error("generating Token Failed: " + err);
-              res.sendStatus(200);
+              res.status(200).cookie("testKey", "testValue", { path: "/", httpOnly: false, SameSite: "Lax" }).end();
               return;
             };
             //トークンの発行に成功した場合、クライアントのブラウザ(Cookie)に保存させる
             console.log("generated Token: " + token);
-            res.cookie("accessToken", token);
-            res.sendStatus(200);
+            res.status(200).cookie("accessToken", token, { path: "/", httpOnly: false, SameSite: "Lax" }).end();
             return;
           }
         );
         return;
       }
     }
+    //マッチするユーザが見つからなければログイン失敗とする
     console.log("ログイン失敗");
     res.sendStatus(403);
   });
