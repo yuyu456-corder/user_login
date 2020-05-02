@@ -8,9 +8,9 @@ const good_users = [
   },
 ];
 
-describe("user_loginの正常ログイン機能をテストします！", function() {
+describe("user_loginの正常ログイン機能をテストします！", function () {
   good_users.map((user) => {
-    it("ユーザー新規登録試行: " + user.name, function() {
+    it("ユーザー新規登録試行: " + user.name, function () {
       cy.visit("/");
       cy.get('input[name="user_name"]').type(user.name);
       cy.get('input[name="password"]').type(user.password);
@@ -27,7 +27,7 @@ describe("user_loginの正常ログイン機能をテストします！", functi
       });
     });
 
-    it("登録済ユーザーログイン試行: " + user.name, function() {
+    it("登録済ユーザーログイン試行: " + user.name, function () {
       cy.visit("/login");
       cy.get('input[placeholder="ユーザー名"]').type(user.name);
       cy.get('input[name="password"]').type(user.password);
@@ -42,7 +42,7 @@ describe("user_loginの正常ログイン機能をテストします！", functi
         });
     });
 
-    it("ユーザーマスタでの存在確認: " + user.name, function() {
+    it("ユーザーマスタでの存在確認: " + user.name, function () {
       cy.visit("/AdministratorPage");
       cy.wait(200);
       cy.get("tr")
@@ -50,7 +50,7 @@ describe("user_loginの正常ログイン機能をテストします！", functi
         .should("contain", user.name);
     });
 
-    it("ユーザーマスタからの削除テスト: " + user.name, function() {
+    it("ユーザーマスタからの削除テスト: " + user.name, function () {
       cy.visit("/AdministratorPage");
       cy.wait(200);
       cy.get("tr>td>button")

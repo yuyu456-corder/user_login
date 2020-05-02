@@ -34,24 +34,6 @@ export default (app, http) => {
   };
 
   /**
-   * アクセストークンのデコードを行う
-   * @param {string} getAccessToken - クライアントから受け取った後アクセストークン
-   * @return {array} - デコードしたアクセストークン
-   */
-  // const decodeJwt = getAccessToken => {
-  //   const base64JwtUrls = getAccessToken(".");
-  //   //base64のデコードする前にエンコード対象外の文字列を置換する
-  //   const base64jwtTokens = base64JwtUrls.map(base64JwtUrl => {
-  //     return base64JwtUrl.replace(/-/g, "+").replace(/_/g, "/");
-  //   });
-  //   //base64のバイナリデータに変換する
-  //   const base64Buffer = base64jwtTokens.map(base64jwtToken => {
-  //     base64jwtToken = new Buffer(base64jwtToken, "base64")
-  //   });
-  //   return decodeAccessToken;
-  // };
-
-  /**
    * 以下routing
    * 可読性のため、あとで別ファイルとして独立させるべき
    */
@@ -62,23 +44,37 @@ export default (app, http) => {
   });
 
   // アクセストークンによる自動ログイン
-  // app.post("/loginAccessToken", (req, res) => {
-  //クライアントのリクエストにアクセストークンがあればログイン処理は成功させる
-  //   console.log("get cookie: " + req.cookies["accessToken"]);
-  //   if (req.cookies !== undefined) {
-  //     console.log("AccessToken detected!: " + req.cookies["accessToken"]);
-  //     //受け取ったトークンを復号し、正当性を確認
-  //     const decodeJwtResult = decodeJwt(getAccessToken);
-  //     console.debug(decodeJwtResult);
-  //     //正当性が確認されればログイン成功とする
-  //     res.sendStatus(200);
-  //     console.log("ログイン成功");
-  //     return;
-  //   };
-  //   //トークンが確認できなければ何もしない
-  //   res.sendStatus(200);
-  //   return;
-  // });
+  app.get("/loginAccessToken", (req, res) => {
+    const jwt = require("jsonwebtoken");
+    console.log("loginAccessToken Routing");
+    //クライアントのリクエストにアクセストークンがあればログイン処理は成功させる
+    if (req.cookies["accessToken"] !== undefined) {
+      console.log("AccessToken detected: " + req.cookies["accessToken"]);
+      //受け取ったトークンを復号し、正当性を確認
+      //秘密鍵の取得
+      require("dotenv").config();
+      //秘密鍵の取得。改行コードのエスケープを解除し、バイナリデータ化する
+      //秘密鍵が存在しない場合はreplaceメソッドで動かなくなるのでそれを回避する
+      let privateKey;
+      if (process.env.PRIVATE_KEY) {
+        privateKey = Buffer.from(process.env.PRIVATE_KEY.replace(/\\n/g, '\n'));
+        jwt.verify(req.cookies["accessToken"], privateKey, (err, decoded) => {
+          //トークンの正当性(PayloadのIDが正しい且つSignatureが改ざんされていない)が確認されればログイン成功とする
+          if (decoded) {
+            console.log("アクセストークンによるログイン成功");
+            res.sendStatus(200);
+            return;
+            //トークンの正当性が確保できない場合何もしない
+          } else if (err) {
+            //有効なトークンが確認できなければ何もしない
+            console.log("Valid Access Token is not Existed");
+            res.sendStatus(200);
+            return;
+          }
+        });
+      }
+    };
+  });
 
   // アカウント情報入力によるログイン
   app.post("/login", async (req, res, next) => {
@@ -116,7 +112,7 @@ export default (app, http) => {
         }
         // 既にアカウント作成済みのユーザからリクエストが送られたらユーザ情報でトークンを発行する
         // APIサーバと認可サーバが同じのため、HS256（共通鍵）で暗号化している
-        jwt.sign({ id: user.id }, privateKey, { algorithm: "HS256" },
+        jwt.sign({ sub: user.id }, privateKey, { algorithm: "HS256" },
           (err, token) => {
             //トークンの発行に失敗した場合でもログイン処理を中断しないようにする
             if (err) {
