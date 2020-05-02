@@ -66,9 +66,9 @@ export default (app, http) => {
             return;
             //トークンの正当性が確保できない場合何もしない
           } else if (err) {
-            //有効なトークンが確認できなければ何もしない
-            console.log("Valid Access Token is not Existed");
-            res.sendStatus(200);
+            //有効なトークンが確認できなければ403を返す
+            console.log("Valid Access Token is not Existed:" + err);
+            res.sendStatus(403);
             return;
           }
         });

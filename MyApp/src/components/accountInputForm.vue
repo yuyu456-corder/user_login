@@ -6,7 +6,12 @@
     <!-- ID入力欄
     表示するのはユーザー情報変更時のみ-->
     <span v-if="formType === 'update'">
-      <input type="text" v-model="accountData.id" name="user_id" placeholder="ユーザーID" />
+      <input
+        type="text"
+        v-model="accountData.id"
+        name="user_id"
+        placeholder="ユーザーID"
+      />
     </span>
     <br />
 
@@ -35,8 +40,18 @@
 
     <!-- 情報更新時か新規作成時にのみ選択する項目 -->
     <div v-if="formType === 'register' || formType === 'update'">
-      <input type="radio" v-model="accountData.sex" name="sex" value="male" />男性
-      <input type="radio" v-model="accountData.sex" name="sex" value="female" />女性
+      <input
+        type="radio"
+        v-model="accountData.sex"
+        name="sex"
+        value="male"
+      />男性
+      <input
+        type="radio"
+        v-model="accountData.sex"
+        name="sex"
+        value="female"
+      />女性
       <br />
 
       <select name="office_place" v-model="accountData.office">
@@ -77,12 +92,14 @@
 <script>
 // axiosでHTTP通信を行うためのJSモジュールをインポート
 import axiosHttpCommunication from "../js/axios_http_communication.js";
+// ページ内で別ページに遷移させたい為、routerをインポート
+import router from "../router/index.js";
 
 export default {
   name: "accountInputForm",
   props: {
     msg: String,
-    formType: String // either of "update", "register", "login"
+    formType: String, // either of "update", "register", "login"
   },
   data: function() {
     return {
@@ -98,7 +115,7 @@ export default {
         office: "",
         sex: "",
         name: "",
-        password: ""
+        password: "",
       },
       //アクセスカウンタ（初期値0）
       accessCount: 0,
@@ -107,7 +124,7 @@ export default {
       //サーバからのレスポンスデータを受け取る変数
       responseData: "",
       // Boolean to show if the login attempt is successful
-      loginFailed: false
+      loginFailed: false,
     };
   },
   computed: {
@@ -120,7 +137,7 @@ export default {
       if (this.formType === "update") return "新しいパスワード";
       if (this.formType === "register") return "新規パスワード";
       if (this.formType === "login") return "パスワード";
-    }
+    },
   },
   methods: {
     // 登録ボタンが押された場合
@@ -151,17 +168,19 @@ export default {
       //トークン発行＞アクセストークンとしてクライアントに送信するのは、ログイン処理が終わってから行う
       await axios
         .post(this.DBFileServerPort + "/login", this.accountData, {
-          withCredentials: true
+          withCredentials: true,
         })
         .then(
           //ログイン成功
-          resolve => {
+          (resolve) => {
             this.loginFailed = false;
             alert("ログインに成功しました");
+            //ユーザごとのマイページへ遷移する
+            router.push({ name: "myPage", params: { id: 1 } });
             return;
           },
           //ログイン失敗
-          err => {
+          (err) => {
             this.loginFailed = true;
             return;
           }
@@ -249,8 +268,8 @@ export default {
       console.debug("called axiosHttpCommunication!");
       //POST通信でDBへアカウント情報（レコード）を追加する
       axiosHttpCommunication(DestinationURL, "POST", this.accountData);
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -10,6 +10,8 @@
 
 <script>
 import accountInputForm from "@/components/accountInputForm.vue";
+// ページ内で別ページに遷移させたい為、routerをインポート
+import router from "../router/index.js";
 
 export default {
   name: "Login",
@@ -29,9 +31,20 @@ export default {
     let getAccessToken = getCookies.filter((cookie) => "accessToken" + /=*/);
     if (getAccessToken) {
       //アクセストークンをサーバへ返送する（セッションを行う）
-      await axios.get(this.DBFileServerPort + "/loginAccessToken", {
-        withCredentials: true,
-      });
+      await axios
+        .get(this.DBFileServerPort + "/loginAccessToken", {
+          withCredentials: true,
+        })
+        .then(
+          (resoleve) => {
+            alert("ログインに成功しました");
+            //ユーザごとのマイページへ遷移する
+            router.push({ name: "myPage", params: { id: 1 } });
+          },
+          (failed) => {
+            console.log("Valid Access Token is not Existed");
+          }
+        );
     }
   },
 };
