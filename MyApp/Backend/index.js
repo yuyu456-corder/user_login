@@ -46,7 +46,9 @@ export default (app, http) => {
   // アクセストークンによる自動ログイン
   app.get("/loginAccessToken", (req, res) => {
     const jwt = require("jsonwebtoken");
-    console.log("loginAccessToken Routing");
+    const models = require("./models/");
+
+    console.log("loginAccessToken called");
     //クライアントのリクエストにアクセストークンがあればログイン処理は成功させる
     if (req.cookies["accessToken"] !== undefined) {
       console.log("AccessToken detected: " + req.cookies["accessToken"]);
@@ -58,12 +60,28 @@ export default (app, http) => {
       let privateKey;
       if (process.env.PRIVATE_KEY) {
         privateKey = Buffer.from(process.env.PRIVATE_KEY.replace(/\\n/g, '\n'));
-        jwt.verify(req.cookies["accessToken"], privateKey, (err, decoded) => {
+        jwt.verify(req.cookies["accessToken"], privateKey, async (err, decoded) => {
           //トークンの正当性(PayloadのIDが正しい且つSignatureが改ざんされていない)が確認されればログイン成功とする
           if (decoded) {
             console.log("アクセストークンによるログイン成功");
-            res.sendStatus(200);
-            return;
+            //usersテーブルから対象ユーザのidを取得する
+            await models.user
+              .findAll({ attributes: ["id"], where: { id: decoded.sub } })
+              .then(
+                //Promise Resolve(参照成功)
+                resolve => {
+                  let getUserId = JSON.stringify(resolve);
+                  //JSONファイルとしてデータをFrontendに返している
+                  res.json(getUserId);
+                  return;
+                },
+                //Promise Failed（参照失敗）
+                failed => {
+                  console.error("Table Referencing Promise Failed by:" + failed);
+                  res.status(403).end();
+                  return;
+                }
+              )
             //トークンの正当性が確保できない場合何もしない
           } else if (err) {
             //有効なトークンが確認できなければ403を返す
@@ -117,13 +135,20 @@ export default (app, http) => {
             //トークンの発行に失敗した場合でもログイン処理を中断しないようにする
             if (err) {
               console.error("generating Token Failed: " + err);
-              res.status(200).cookie("testKey", "testValue", { path: "/", httpOnly: false, SameSite: "Lax" }).end();
+              res.status(200).cookie("testKey", "testValue", { path: "/", httpOnly: false, SameSite: "Lax" });
+              let resUserId = JSON.stringify([{ "id": user.id }]);
+              //フロントエンド側にIDを返す
+              res.json(resUserId);
               return;
-            };
-            //トークンの発行に成功した場合、クライアントのブラウザ(Cookie)に保存させる
-            console.log("generated Token: " + token);
-            res.status(200).cookie("accessToken", token, { path: "/", httpOnly: false, SameSite: "Lax" }).end();
-            return;
+            } else {
+              //トークンの発行に成功した場合、クライアントのブラウザ(Cookie)に保存させる
+              console.log("generated Token: " + token);
+              res.status(200).cookie("accessToken", token, { path: "/", httpOnly: false, SameSite: "Lax" });
+              let resUserId = JSON.stringify([{ "id": user.id }]);
+              //フロントエンド側にIDを返す
+              res.json(resUserId);
+              return;
+            }
           }
         );
         return;

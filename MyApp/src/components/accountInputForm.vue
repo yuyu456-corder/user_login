@@ -176,7 +176,7 @@ export default {
             this.loginFailed = false;
             alert("ログインに成功しました");
             //ユーザごとのマイページへ遷移する
-            router.push({ name: "myPage", params: { id: 1 } });
+            router.push({ name: "myPage", params: { id: resolve.data } });
             return;
           },
           //ログイン失敗

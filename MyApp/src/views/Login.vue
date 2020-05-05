@@ -36,10 +36,12 @@ export default {
           withCredentials: true,
         })
         .then(
-          (resoleve) => {
+          (resolve) => {
             alert("ログインに成功しました");
             //ユーザごとのマイページへ遷移する
-            router.push({ name: "myPage", params: { id: 1 } });
+            //resolve.dataはJSONなのでstring扱いとなる（resolve自体はreqestデータなのでobject）
+            console.log(resolve.data);
+            router.push({ name: "myPage", params: { id: resolve.data } });
           },
           (failed) => {
             console.log("Valid Access Token is not Existed");
