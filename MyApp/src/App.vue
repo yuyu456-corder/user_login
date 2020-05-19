@@ -1,34 +1,37 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Frontend</router-link> |
-      <router-link to="/login">Login</router-link> |
-      <router-link to="/update">Update</router-link> |
-      <router-link to="/AdministratorPage">Administrator Page</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <v-app>
+    <v-card>
+      <v-app-bar color="primary" dark app>
+        <v-toolbar-title>user_login</v-toolbar-title>
+        <template v-slot:extension>
+          <v-tabs
+            align-with-title
+          >
+            <v-tab>Register</v-tab>
+            <v-tab>Login</v-tab>
+            <v-tab>Update</v-tab>
+            <v-tab>Administrator Page</v-tab>
+          </v-tabs>
+        </template>
+      </v-app-bar>
+      </v-sheet>
+    </v-card>
+  </v-app>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+export default {
+  name: "App",
 
-#nav {
-  padding: 30px;
-}
+  components: {},
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+  data: () => ({
+    tabLinkPass: [
+      "./views/Frontend.vue",
+      "./views/Login.vue",
+      "./views/Update.vue",
+      "./views/AdministratorPage.vue",
+    ],
+  }),
+};
+</script>
