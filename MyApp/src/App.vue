@@ -6,32 +6,28 @@
         <template v-slot:extension>
           <v-tabs
             align-with-title
+            fixed-tabs
           >
-            <v-tab>Register</v-tab>
-            <v-tab>Login</v-tab>
-            <v-tab>Update</v-tab>
-            <v-tab>Administrator Page</v-tab>
+            <v-tab to="/">Register</v-tab>
+            <v-tab to="/Login">Login</v-tab>
+            <v-tab to="/Update">Update</v-tab>
+            <v-tab to="/AdministratorPage">Administrator Page</v-tab>
           </v-tabs>
         </template>
       </v-app-bar>
       </v-sheet>
     </v-card>
+    <router-view></router-view>
   </v-app>
 </template>
 
 <script>
+
 export default {
   name: "App",
 
   components: {},
 
-  data: () => ({
-    tabLinkPass: [
-      "./views/Frontend.vue",
-      "./views/Login.vue",
-      "./views/Update.vue",
-      "./views/AdministratorPage.vue",
-    ],
-  }),
+  data: () => {},
 };
 </script>

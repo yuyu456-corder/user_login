@@ -4,11 +4,7 @@
     <h1>新規登録</h1>
 
     <!-- 新規登録フォーム -->
-    <accountInputForm
-      formType="register"
-    />
-
-    
+    <accountInputForm formType="register" />
 
     <p>あなたは{{ accessCount }}人目の訪問者です！</p>
 
@@ -50,13 +46,13 @@ import accountInputForm from "@/components/accountInputForm.vue";
 export default {
   name: "Frontend",
   components: {
-    //ここはこのvueファイルで構成されているコンポーネント名を羅列する？
-    accountInputForm
+    //ここはこのvueファイルで構成されているコンポーネント名を羅列する
+    accountInputForm,
   },
   data: function() {
     return {
       //アクセスカウンタ（初期値0）
-      accessCount: 0
+      accessCount: 0,
     };
   },
   //アクセスカウンタ機能のメソッド
@@ -78,7 +74,7 @@ export default {
     //アクセスカウンタをローカルストレージに保存
     let accessCountJson = JSON.stringify(this.accessCount);
     localStorage.setItem("access_count", accessCountJson);
-  }
+  },
 };
 </script>
 
