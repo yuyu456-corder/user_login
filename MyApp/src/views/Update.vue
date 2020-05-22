@@ -1,14 +1,15 @@
 <template>
   <div class="frontend">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <h1>アカウント情報変更</h1>
+    <v-app>
+      <v-card>
+        <h1>アカウント情報変更</h1>
+        <p>既にアカウントを変更しているユーザーが対象です</p>
+      </v-card>
 
-    <!-- 情報変更フォーム -->
-    <!-- 本来はログインしたユーザーが自分の情報を更新する際に用いる -->
-    <h2>アカウント情報変更</h2>
-    <p>既にアカウントを変更しているユーザーが対象です</p>
-
-    <accountInputForm formType="update" />
+      <!-- 情報変更フォーム -->
+      <!-- 本来はログインしたユーザーが自分の情報を更新する際に用いる -->
+      <accountInputForm formType="update" />
+    </v-app>
   </div>
 </template>
 
@@ -20,14 +21,8 @@ import accountInputForm from "@/components/accountInputForm.vue";
 export default {
   name: "Update",
   components: {
-    //ここはこのvueファイルで構成されているコンポーネント名を羅列する？
-    accountInputForm
-  }
+    //ここはこのvueファイルで構成されているコンポーネント名を羅列する
+    accountInputForm,
+  },
 };
 </script>
-
-<style scoped>
-div.frontend {
-  background-color: #ffeeee;
-}
-</style>

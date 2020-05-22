@@ -98,7 +98,6 @@
 ## あったらいい機能
 
 - ログイン機能が実装できたら、CSV ファイルを DB にインポートさせてデータ分析などを行いたい
-- UI周辺をリッチなデザインにしたい
 
 ## 対応中の不具合
 
@@ -107,6 +106,7 @@
   - 1 アカウントにつき 1 文字にしか反映されない
   - 2 文字以上は未対応
   - CRUD 処理実装中のため、この機能はマージしていない
+- Vuetify適用によりHTMLの要素名等が変わったためCypressが動作しない
 
 ## 問題点
 
@@ -119,6 +119,7 @@
 - VSCode/Git
 - JavaScript
   - Vue.js (framework)
+    - Vuetify(framework)
   - Express.js (framework)
   - axios (npm Library)
   - Vue CLI (npm Library)

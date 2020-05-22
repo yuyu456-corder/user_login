@@ -1,91 +1,78 @@
 <template>
   <div>
-    <!-- アカウント情報入力用のコンポーネント -->
-    <!-- Frontend.vueからフォーム種別の指定を受け取って表示内容を変更している -->
+    <v-app>
+      <!-- アカウント情報入力用のコンポーネント -->
+      <!-- 各Vueファイルからフォーム種別の指定を受け取って表示内容を変更している -->
 
-    <!-- ID入力欄
-    表示するのはユーザー情報変更時のみ-->
-    <span v-if="formType === 'update'">
-      <input
-        type="text"
-        v-model="accountData.id"
-        name="user_id"
-        placeholder="ユーザーID"
-      />
-    </span>
-    <br />
+      <!-- ID入力欄
+      表示するのはユーザー情報変更時のみ-->
+      <span v-if="formType === 'update'">
+        <v-text-field v-model="accountData.id" label="ユーザーID" id="user_id">
+        </v-text-field>
+      </span>
 
-    <!-- ユーザー名入力欄
-    フォーム種別によって微妙にplaceholderの中身が違うのでcomputed属性で対応
-    -->
-    <input
-      type="text"
-      v-model="accountData.name"
-      name="user_name"
-      :placeholder="userNamePlaceholder"
-    />
-    <br />
+      <!-- ユーザー名入力欄
+      フォーム種別によって微妙にplaceholderの中身が違うのでcomputed属性で対応
+      -->
+      <span>
+        <v-text-field
+          v-model="accountData.name"
+          :label="userNamePlaceholder"
+          id="user_name"
+        >
+        </v-text-field>
+      </span>
 
-    <!-- パスワード入力欄
-    type=passwordにより、入力値がマスクされる-->
-    <input
-      type="password"
-      v-model="accountData.password"
-      name="password"
-      :placeholder="passwordPlaceholder"
-    />
-    <br />
+      <!-- パスワード入力欄
+      type=passwordにより、入力値がマスクされる-->
+      <span>
+        <v-text-field
+          type="password"
+          v-model="accountData.password"
+          :label="passwordPlaceholder"
+          id="password"
+        >
+        </v-text-field>
+      </span>
 
-    <p v-if="loginFailed" style="color: red;">ログインに失敗しました。</p>
+      <p v-if="loginFailed" style="color: red;">ログインに失敗しました。</p>
 
-    <!-- 情報更新時か新規作成時にのみ選択する項目 -->
-    <div v-if="formType === 'register' || formType === 'update'">
-      <input
-        type="radio"
-        v-model="accountData.sex"
-        name="sex"
-        value="male"
-      />男性
-      <input
-        type="radio"
-        v-model="accountData.sex"
-        name="sex"
-        value="female"
-      />女性
-      <br />
+      <!-- 情報更新時か新規作成時にのみ選択する項目 -->
+      <div v-if="formType === 'register' || formType === 'update'">
+        <v-radio-group v-model="accountData.sex">
+          <v-radio type="radio" value="male" label="男性" class="sex">
+          </v-radio>
+          <v-radio type="radio" value="female" label="女性" class="sex">
+          </v-radio>
+        </v-radio-group>
 
-      <select name="office_place" v-model="accountData.office">
-        <option value disabled selected>事業所選択</option>
-        <option value="Tokyo">東京事業所</option>
-        <option value="Osaka">大阪事業所</option>
-        <option value="Sendai">仙台事業所</option>
-        <option value="Sapporo">札幌事業所</option>
-        <!-- 他の事業所も追加可能 -->
-      </select>
-    </div>
+        <v-select
+          id="office_place"
+          v-model="accountData.office"
+          label="事業所選択"
+          :items="office_places"
+          dense
+        >
+        </v-select>
+      </div>
 
-    <!-- どのフォームかによって、送信ボタンのテキストを変える -->
-    <input
-      v-if="formType === 'register'"
-      type="button"
-      value="登録"
-      id="registerButton"
-      @click="accountRegister"
-    />
-    <input
-      v-else-if="formType === 'update'"
-      type="button"
-      value="更新"
-      id="updateButton"
-      @click="accountUpdate"
-    />
-    <input
-      v-else-if="formType === 'login'"
-      type="button"
-      value="ログイン"
-      id="loginButton"
-      @click="accountLogin"
-    />
+      <!-- どのフォームかによって、送信ボタンのテキストを変える -->
+      <span v-if="formType === 'register'">
+        <v-btn id="registerButton" @click="accountRegister" color="primary"
+          >登録</v-btn
+        >
+      </span>
+      <span v-else-if="formType === 'update'">
+        <v-btn id="updateButton" @click="accountUpdate" color="primary"
+          >更新</v-btn
+        >
+      </span>
+      <span v-else-if="formType === 'login'">
+        <v-btn id="loginButton" @click="accountLogin" color="primary"
+          >ログイン</v-btn
+        >
+      </span>
+    </v-app>
   </div>
 </template>
 
@@ -125,6 +112,9 @@ export default {
       responseData: "",
       // Boolean to show if the login attempt is successful
       loginFailed: false,
+      //選択できる事業所リスト
+      //他の事業所も追加可能
+      office_places: ["東京事業所", "大阪事業所", "仙台事業所", "札幌事業所"],
     };
   },
   computed: {
@@ -272,6 +262,3 @@ export default {
   },
 };
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>

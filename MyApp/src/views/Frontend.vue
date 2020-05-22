@@ -1,13 +1,12 @@
 <template>
   <div class="frontend">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <h1>新規登録</h1>
+    <v-card>
+      <h1>新規登録</h1>
+      <p>あなたは{{ accessCount }}人目の訪問者です！</p>
+    </v-card>
 
     <!-- 新規登録フォーム -->
     <accountInputForm formType="register" />
-
-    <p>あなたは{{ accessCount }}人目の訪問者です！</p>
-
     <!-- 
           <h3>登録情報確認（未実装）</h3>
           <div v-show="!isLoggedIn">
@@ -77,9 +76,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-div.frontend {
-  background-color: #ffeeee;
-}
-</style>

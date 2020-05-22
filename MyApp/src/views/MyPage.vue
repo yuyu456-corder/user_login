@@ -17,9 +17,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-div.frontend {
-  background-color: #8fbc8f;
-}
-</style>

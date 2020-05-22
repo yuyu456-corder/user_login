@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app id="app">
     <v-card>
       <v-app-bar color="primary" dark app>
         <v-toolbar-title>user_login</v-toolbar-title>
@@ -17,7 +17,9 @@
       </v-app-bar>
       </v-sheet>
     </v-card>
-    <router-view></router-view>
+    <v-content>
+      <router-view></router-view>
+    </v-content>
   </v-app>
 </template>
 
@@ -28,6 +30,11 @@ export default {
 
   components: {},
 
-  data: () => {},
+  data: () => {
+    return {};
+  },
 };
 </script>
+
+<style scoped>
+</style>

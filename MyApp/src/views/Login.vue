@@ -1,7 +1,8 @@
 <template>
   <div class="frontend">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <h1>ログイン画面</h1>
+    <v-card>
+      <h1>ログイン</h1>
+    </v-card>
 
     <!-- ログインフォーム -->
     <accountInputForm formType="login" />
@@ -51,9 +52,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-div.frontend {
-  background-color: #ffeeee;
-}
-</style>
