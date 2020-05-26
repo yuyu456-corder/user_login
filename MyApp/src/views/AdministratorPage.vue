@@ -1,35 +1,40 @@
 <template>
   <div class="backend">
-    <h1>管理者画面</h1>
-    <!-- 検索機能はDB実装が終わってからaddする -->
-    <!-- <input type="text" placeholder="名前で検索" v-model="searchName" /> -->
-    <!-- <input type="button" value="検索" @click="searchWord()" /> -->
+    <v-app>
+      <v-card>
+        <h1>管理者画面</h1>
+        <!-- 検索機能はDB実装が終わってからaddする -->
+        <!-- <input type="text" placeholder="名前で検索" v-model="searchName" /> -->
+        <!-- <input type="button" value="検索" @click="searchWord()" /> -->
 
-    <!-- <input type="checkbox" id="sexFilter" v-model="femaleHidden" /> -->
-    <!-- <label for="sexFilter">男性のみ表示</label> -->
-    <!-- sexFilterはmember情報にshownを追加してv-shownで行っていた -->
+        <!-- <input type="checkbox" id="sexFilter" v-model="femaleHidden" /> -->
+        <!-- <label for="sexFilter">男性のみ表示</label> -->
+        <!-- sexFilterはmember情報にshownを追加してv-shownで行っていた -->
+        <h2>アカウント登録者一覧</h2>
+      </v-card>
 
-    <h2>アカウント登録者一覧</h2>
-    <table id="memberList">
-      <tr>
-        <th>ID</th>
-        <th>名前</th>
-        <th>性別</th>
-        <th>事業所</th>
-        <th>削除</th>
-      </tr>
-      <tr v-for="member in members" v-bind:key="member.id">
-        <td>{{ member.id }}</td>
-        <td>{{ member.name }}</td>
-        <td>{{ member.sex }}</td>
-        <td>{{ member.office }}</td>
-        <td>
-          <button @click="removeMember(member.id)">削除</button>
-        </td>
-      </tr>
-    </table>
+      <v-data-table
+        id="memberList"
+        show-select
+        v-model="checkboxSelected"
+        :headers="tableHeaders"
+        :items="members"
+        item-key="id"
+      >
+        <!-- <th>削除</th>
+            <button @click="removeMember(member.id)">削除</button>
+          </td>
+        </tr> -->
+      </v-data-table>
 
-    <button @click="doClear">LocalStorage初期化</button>
+      <v-btn id="remove_account" @click="inputRemoveButton" color="primary">
+        選択アカウントを削除
+      </v-btn>
+
+      <v-btn id="clear_localStorage" @click="doClear">
+        Local Storage初期化
+      </v-btn>
+    </v-app>
   </div>
 </template>
 
@@ -41,6 +46,15 @@ export default {
   name: "AdministratorPage",
   data: function() {
     return {
+      checkboxSelected: [],
+      tableHeaders: [
+        { text: "ID", align: "start", value: "id" },
+        { text: "名前", value: "name" },
+        { text: "性別", value: "sex" },
+        { text: "事業所", value: "office" },
+        { text: "登録時間", value: "createdAt" },
+        { text: "更新時間", value: "updatedAt" },
+      ],
       members: [],
       // ユーザーからの入力値(v-modelで参照)
       // isLoggedIn: false, // ログイン状態の判定
@@ -52,24 +66,34 @@ export default {
       //DBサーバのドメイン
       DBFileServerPort: "http://localhost:8000",
       //DBから取得したアカウントデータ
-      getUserData: ""
+      getUserData: "",
     };
   },
   methods: {
+    //アカウント削除ボタンが押された時のイベントハンドラ
+    inputRemoveButton: function() {
+      if (!this.checkboxSelected.length) {
+        alert("削除するアカウントにチェックボックスを入れてください");
+      }
+      //チェックボックスが選択されいてるアカウントは全て削除する
+      this.checkboxSelected.forEach((selectedAccount) => {
+        this.removeMember(selectedAccount.id);
+      });
+    },
     //ローカルストレージの初期化
     doClear: function() {
       if (confirm("ローカルストレージを本当に空にしてもよろしいですか？")) {
         localStorage.clear();
       }
     },
+    //DBから対象アカウントを削除する
     removeMember: function(id) {
       const axios = require("axios");
       axios.post(this.DBFileServerPort + "/deleteRecord/" + id);
       this.loadMemberList();
     },
-    //LocalStorage(またはDB)にアカウント情報全体を保存するメソッド（モジュール化）
-    //アカウント削除を行うメソッド（モジュール化）
     //アカウント検索＋着色メソッド（モジュール化）
+    //LocalStorage(またはDB)にアカウント情報全体を保存するメソッド（モジュール化）
     loadMemberList: async function() {
       this.getUserData = await axiosHttpCommunication(
         this.DBFileServerPort + "/ReferenceTable",
@@ -78,29 +102,12 @@ export default {
       console.debug("getUserDataの内容:", this.getUserData);
       //連想配列にして、vue側のdataオプションで捕捉する
       this.members = await JSON.parse(this.getUserData);
-    }
+    },
   },
   //ページリロード時にアカウントデータをDBから取得するメソッド
   created: function() {
     console.log("Vue instance created!");
     this.loadMemberList();
-  }
+  },
 };
 </script>
-
-<style scoped>
-div.backend {
-  background-color: #afeeee;
-}
-
-#memberList {
-  border-collapse: collapse;
-  margin: 0 auto;
-}
-
-table,
-th,
-td {
-  border: solid 1px black;
-}
-</style>
