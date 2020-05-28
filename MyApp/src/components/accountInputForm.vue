@@ -139,7 +139,7 @@ export default {
       //DBにアカウント情報を追加する(AxiosでDB操作を行うサーバへリクエストを行う)
       try {
         await axios.post(
-          this.DBFileServerPort + "/RecordInsert",
+          this.DBFileServerPort + "/insertRecord",
           this.accountData
         );
         alert("登録が完了しました");
@@ -193,7 +193,7 @@ export default {
       try {
         //DBのアカウント情報を更新する
         await axios.post(
-          this.DBFileServerPort + "/UpdateRecord",
+          this.DBFileServerPort + "/updateRecord",
           this.accountData
         );
         alert("登録処理が成功しました");

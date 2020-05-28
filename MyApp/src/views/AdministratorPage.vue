@@ -21,10 +21,6 @@
         :items="members"
         item-key="id"
       >
-        <!-- <th>削除</th>
-            <button @click="removeMember(member.id)">削除</button>
-          </td>
-        </tr> -->
       </v-data-table>
 
       <v-btn id="remove_account" @click="inputRemoveButton" color="primary">
@@ -80,23 +76,23 @@ export default {
         this.removeMember(selectedAccount.id);
       });
     },
-    //ローカルストレージの初期化
-    doClear: function() {
-      if (confirm("ローカルストレージを本当に空にしてもよろしいですか？")) {
-        localStorage.clear();
-      }
-    },
     //DBから対象アカウントを削除する
     removeMember: function(id) {
       const axios = require("axios");
       axios.post(this.DBFileServerPort + "/deleteRecord/" + id);
       this.loadMemberList();
     },
+    //ローカルストレージの初期化
+    doClear: function() {
+      if (confirm("ローカルストレージを本当に空にしてもよろしいですか？")) {
+        localStorage.clear();
+      }
+    },
     //アカウント検索＋着色メソッド（モジュール化）
     //LocalStorage(またはDB)にアカウント情報全体を保存するメソッド（モジュール化）
     loadMemberList: async function() {
       this.getUserData = await axiosHttpCommunication(
-        this.DBFileServerPort + "/ReferenceTable",
+        this.DBFileServerPort + "/referenceTable",
         "GET"
       );
       console.debug("getUserDataの内容:", this.getUserData);

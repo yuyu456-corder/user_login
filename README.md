@@ -74,7 +74,8 @@
       通信を行う JS モジュール
     - MyApp/src/views/Frontend.vue :フロントエンドの view の中核になるファイル
 - MyApp/Backend/ :バックエンド側のファイルをまとめたディレクトリ
-  - MyApp/Backend/index.js :Backend 側の処理を行う JS ファイル
+  - MyApp/Backend/index.js :Backend 側の処理を行うメインのJSファイル
+    - MyApp/Backend/routing_module/ :Backendのルーティング処理のモジュールをまとめたディレクトリ
   - MyApp/Backend/account.sqlite :DB 本体
 
 ## 実装機能
