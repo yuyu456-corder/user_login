@@ -19,6 +19,7 @@
           v-model="accountData.name"
           :label="userNamePlaceholder"
           id="user_name"
+          data-cy="userName"
         >
         </v-text-field>
       </span>
@@ -31,18 +32,33 @@
           v-model="accountData.password"
           :label="passwordPlaceholder"
           id="password"
+          data-cy="password"
         >
         </v-text-field>
       </span>
 
-      <p v-if="loginFailed" style="color: red;">ログインに失敗しました。</p>
+      <p v-if="loginFailed" style="color: red;" data-cy="loginFailed">
+        ログインに失敗しました
+      </p>
 
       <!-- 情報更新時か新規作成時にのみ選択する項目 -->
       <div v-if="formType === 'register' || formType === 'update'">
         <v-radio-group v-model="accountData.sex">
-          <v-radio type="radio" value="male" label="男性" class="sex">
+          <v-radio
+            type="radio"
+            value="male"
+            label="男性"
+            class="sex"
+            data-cy="sex_male"
+          >
           </v-radio>
-          <v-radio type="radio" value="female" label="女性" class="sex">
+          <v-radio
+            type="radio"
+            value="female"
+            label="女性"
+            class="sex"
+            data-cy="sex_female"
+          >
           </v-radio>
         </v-radio-group>
 
@@ -51,26 +67,52 @@
           v-model="accountData.office"
           label="事業所選択"
           :items="office_places"
+          data-cy="officePlaces"
           dense
         >
         </v-select>
       </div>
 
+      <p v-if="registerSucceed" style="color: blue;" data-cy="registerSucceed">
+        アカウント登録が完了しました
+      </p>
+      <p v-if="registerFailed" style="color: red;" data-cy="registerFailed">
+        アカウント登録に失敗しました
+      </p>
+      <p v-if="updateSucceed" style="color: blue;" data-cy="updateSucceed">
+        アカウント更新が完了しました
+      </p>
+      <p v-if="updateFailed" style="color: red;" data-cy="updateFailed">
+        アカウント更新に失敗しました
+      </p>
+
       <!-- どのフォームかによって、送信ボタンのテキストを変える -->
       <span v-if="formType === 'register'">
-        <v-btn id="registerButton" @click="accountRegister" color="primary"
-          >登録</v-btn
-        >
+        <v-btn
+          id="registerButton"
+          @click="accountRegister"
+          color="primary"
+          data-cy="registerButton"
+          >登録
+        </v-btn>
       </span>
       <span v-else-if="formType === 'update'">
-        <v-btn id="updateButton" @click="accountUpdate" color="primary"
-          >更新</v-btn
-        >
+        <v-btn
+          id="updateButton"
+          @click="accountUpdate"
+          color="primary"
+          data-cy="updateButton"
+          >更新
+        </v-btn>
       </span>
       <span v-else-if="formType === 'login'">
-        <v-btn id="loginButton" @click="accountLogin" color="primary"
-          >ログイン</v-btn
-        >
+        <v-btn
+          id="loginButton"
+          @click="accountLogin"
+          color="primary"
+          data-cy="loginButton"
+          >ログイン
+        </v-btn>
       </span>
     </v-app>
   </div>
@@ -110,8 +152,12 @@ export default {
       DBFileServerPort: "http://localhost:8000",
       //サーバからのレスポンスデータを受け取る変数
       responseData: "",
-      // Boolean to show if the login attempt is successful
+      // Boolean to show if the CRUD attempt is successful
       loginFailed: false,
+      registerSucceed: false,
+      registerFailed: false,
+      updateSucceed: false,
+      updateFailed: false,
       //選択できる事業所リスト
       //他の事業所も追加可能
       office_places: ["東京事業所", "大阪事業所", "仙台事業所", "札幌事業所"],
@@ -142,9 +188,12 @@ export default {
           this.DBFileServerPort + "/insertRecord",
           this.accountData
         );
-        alert("登録が完了しました");
+        //登録の成功可否をフロントエンドに反映させる
+        this.registerSucceed = true;
+        this.registerFailed = false;
       } catch (err) {
-        alert("登録が失敗しました: " + err);
+        this.registerSucceed = false;
+        this.registerFailed = true;
       }
     },
     // ログインボタンが押された場合
@@ -164,7 +213,6 @@ export default {
           //ログイン成功
           (resolve) => {
             this.loginFailed = false;
-            alert("ログインに成功しました");
             //ユーザごとのマイページへ遷移する
             router.push({ name: "myPage", params: { id: resolve.data } });
             return;
@@ -196,9 +244,12 @@ export default {
           this.DBFileServerPort + "/updateRecord",
           this.accountData
         );
-        alert("登録処理が成功しました");
+        //更新の成功可否をフロントエンドに反映させる
+        this.updateSucceed = true;
+        this.updateFailed = false;
       } catch (err) {
-        alert("登録処理が失敗しました: " + err);
+        this.updateSucceed = false;
+        this.updateFailed = true;
         return;
       }
     },

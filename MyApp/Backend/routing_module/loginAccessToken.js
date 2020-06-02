@@ -42,10 +42,9 @@ router.get("/", (req, res) => {
               }
             )
           //トークンの正当性が確保できない場合何もしない
-        } else if (err) {
-          //有効なトークンが確認できなければ403を返す
+        } else {
           console.log("Valid Access Token is not Existed:" + err);
-          res.sendStatus(403);
+          res.end();
           return;
         }
       });

@@ -20,10 +20,16 @@
         :headers="tableHeaders"
         :items="members"
         item-key="id"
+        data-cy="accountTable"
       >
       </v-data-table>
 
-      <v-btn id="remove_account" @click="inputRemoveButton" color="primary">
+      <v-btn
+        id="removeAccount"
+        @click="inputRemoveButton"
+        color="primary"
+        data-cy="removeAccount"
+      >
         選択アカウントを削除
       </v-btn>
 
