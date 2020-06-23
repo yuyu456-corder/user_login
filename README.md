@@ -110,7 +110,7 @@
 ## 問題点
 
 - sequelize-cli で作成された config.json の storage は DB へのパスが設定されているが、API サーバが実行中は MyApp/（npm start）からの相対パスでないと接続できず、  
-  CLI で sequelize-cli を用いて Migration 等を行うときはコマンドを実行するカレンとディレクトリからの相対パスでないと DB と接続できない
+  CLI で sequelize-cli を用いて Migration 等を行うときはコマンドを実行するカレントディレクトリからの相対パスでないと DB と接続できない
 - モジュール化した axios_http_communication.js 経由でサーバとの HTTP 通信を行うと、レスポンス結果が Vue 側で検知できないため、現在使用していない個所もある
 - DBにマルチバイト文字として保存してしまっている
 
