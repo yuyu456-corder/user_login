@@ -34,6 +34,13 @@
             placeholder="パスワード"
           />
           <button v-on:click="">ログイン</button> -->
+    <v-container>
+      <h1>Firebaseテスト</h1>
+      <v-text-field id="sendText"> </v-text-field>
+      <v-btn id="updateFirebase" @click="testFireBaseUpdate" color="primary"
+        >Firebaseへ反映
+      </v-btn>
+    </v-container>
   </div>
 </template>
 
@@ -54,10 +61,20 @@ export default {
       accessCount: 0,
     };
   },
+  methods: {
+    //入力内容をFireBase側に反映するメソッド
+    testFireBaseUpdate: function() {
+      console.log("testFireBaseUpdate called!");
+      let updateData = document.getElementById("sendText").value;
+      firebase
+        .database()
+        .ref("testData")
+        .set(updateData);
+    },
+  },
   //アクセスカウンタ機能のメソッド
   created: function() {
     console.log("Vue instance created!");
-
     //ローカルストレージにaccess_countが入ってるか確認する
     //初期化時にストレージ参照するとundefined取得するので飛ばす
     //ストレージからカウンタを取得して数値に変換
